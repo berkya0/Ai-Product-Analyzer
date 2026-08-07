@@ -20,7 +20,7 @@ public class ProductController {
 
     @PutMapping("save")
     public ResponseEntity<Void> trendyolScrap(@RequestParam String productUrl) throws IOException {
-        trendyolScrapper.trendyolScrapper(productUrl);
+            //deneme yapıldı
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

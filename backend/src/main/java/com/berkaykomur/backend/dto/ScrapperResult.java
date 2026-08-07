@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.math.BigDecimal;
 
 @Builder
-public record ScrapperResponse(
+public record ScrapperResult(
         String name,
         String imageUrl,
         String productUrl,

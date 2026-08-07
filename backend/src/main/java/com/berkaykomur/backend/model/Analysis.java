@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +14,13 @@ import java.util.List;
 @Setter
 @Getter
 @NoArgsConstructor
+@SuperBuilder
 public class Analysis extends BaseEntity {
 
     private Double aiScore;
     private String summary;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private Status status=Status.PENDING;
 
     private String topPositiveComment;
     private String topNegativeComment;

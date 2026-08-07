@@ -16,6 +16,7 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .message(e.getMessage())
                 .build();
+        e.printStackTrace();
         return ResponseEntity.status(e.getStatus()).body(apiError);
     }
     @ExceptionHandler(Exception.class)
@@ -27,6 +28,7 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .message("Unexpected error occurred")
                 .build();
+        e.printStackTrace();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(apiError);
