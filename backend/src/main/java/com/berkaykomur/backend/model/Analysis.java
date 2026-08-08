@@ -1,6 +1,7 @@
 package com.berkaykomur.backend.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,20 +19,29 @@ import java.util.List;
 public class Analysis extends BaseEntity {
 
     private Double aiScore;
-    private String summary;
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private Status status=Status.PENDING;
 
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+
+    @Column(columnDefinition = "TEXT")
     private String topPositiveComment;
+
+    @Column(columnDefinition = "TEXT")
     private String topNegativeComment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id",nullable = false)
     private Product product;
 
+
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
+    @Builder.Default
     private List<AnalysisHighlight> highlights = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<FeatureSentiment> featureSentiments = new ArrayList<>();
 

@@ -1,17 +1,12 @@
 package com.berkaykomur.backend.controller;
 
-import com.berkaykomur.backend.ai.AiAnalysis;
 import com.berkaykomur.backend.dto.AnalysisResult;
-import com.berkaykomur.backend.dto.ProductResponse;
-import com.berkaykomur.backend.scrapper.Scrapper;
-import com.berkaykomur.backend.scrapper.impl.TrendyolScrapper;
-import com.berkaykomur.backend.service.ScrapperService;
+import com.berkaykomur.backend.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -19,16 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AiController {
 
-    private final ScrapperService scrapperService;
-    private final AiAnalysis aiAnalysis;
-    private final TrendyolScrapper trendyolScrapper;
-    @GetMapping("/scrap")
-    public ResponseEntity<ProductResponse> analyzeComments(@RequestParam String url) {
-        return ResponseEntity.ok(scrapperService.executeScrapping(url));
-    }
-    @GetMapping("/analysis")
-    public ResponseEntity<AnalysisResult> analyzeComment(@RequestParam String url) {
-        return ResponseEntity.ok(aiAnalysis.analyzeComments(trendyolScrapper,url));
-    }
+    private final AiAnalysisService aiAnalysisService;
 
+    @GetMapping("/analyze/{productId}")
+    public ResponseEntity<AnalysisResult> analyzeComments(@PathVariable Long productId) {
+        return ResponseEntity.ok(aiAnalysisService.createAnalysis(productId));
+    }
 }
+
+

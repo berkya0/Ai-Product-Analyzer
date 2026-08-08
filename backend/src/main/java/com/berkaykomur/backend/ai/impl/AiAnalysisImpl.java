@@ -3,9 +3,9 @@ package com.berkaykomur.backend.ai.impl;
 import com.berkaykomur.backend.ai.AiAnalysis;
 import com.berkaykomur.backend.dto.AnalysisResult;
 import com.berkaykomur.backend.dto.Comment;
+import com.berkaykomur.backend.model.Product;
 import com.berkaykomur.backend.scrapper.Scrapper;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class AiAnalysisImpl implements AiAnalysis {
     }
 
     @Override
-    public AnalysisResult analyzeComments(Scrapper scrapper,String productUrl){
+    public AnalysisResult analyzeComments(Scrapper scrapper, String productUrl){
         List<Comment> comments=scrapper.commentScrap(productUrl);
         if(comments.isEmpty()){
             return null;

@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class AnalysisHighlight extends BaseEntity{
 
-    private String AIComments;
+    private String aiComments;
 
     @Enumerated(EnumType.STRING)
     private CommentType commentType;

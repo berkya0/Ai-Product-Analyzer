@@ -36,17 +36,8 @@ public class Product extends BaseEntity {
     @Builder.Default
     private boolean isFollowing=false;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
-    private List<Analysis> analyses=new ArrayList<>();
+    @Builder.Default
+    private List<Analysis> analyses=new ArrayList<>(); //Liste olmasını şuan kullanmıyorum
 
-    public void addAnalysis(Analysis analysis){
-        analyses.add(analysis);
-        analysis.setProduct(this);
-
-    }
-    public void removeAnalysis(Analysis analysis){
-        analyses.remove(analysis);
-        analysis.setProduct(null);
-
-    }
 
 }
