@@ -2,7 +2,25 @@ import React from "react";
 import { FaStar } from "react-icons/fa";
 import { FiCpu } from "react-icons/fi"; // AI sembolü olarak işlemci ikonu
 
-function AiPreferenceCard() {
+function AiPreferenceCard({analysis}) {
+   if (!analysis) {
+    return null;
+  }
+  const score=analysis.aiScore;
+  const scorePercentage = (analysis.aiScore / 5) * 100;
+  const pros=analysis.highlights.filter(
+    (highlight) => highlight.commentType==="PRO");
+  const cons=analysis.highlights.filter(
+    (highlight) => highlight.commentType==="CON");
+
+    let scoreColor;
+    if (score < 2) {
+      scoreColor = "#ef4444";
+    } else if (scorePercentage < 3.5) {
+    scoreColor = "#facc15";
+    } else {
+    scoreColor = "#22c55e";
+  } 
   return (
     <div className="bg-[#FFFFFC] rounded-2xl border border-[#E6C84A] p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center font-['Montserrat']">
       
@@ -20,18 +38,12 @@ function AiPreferenceCard() {
             Neden Alınır?
           </h4>
           <ul className="space-y-1.5 text-xs text-slate-700 font-medium">
-            <li className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-              AMOLED ekran
+           {pros.map((highlight,index)=>(
+            <li key={index} className="flex items-center gap-2">
+               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+               {highlight.aiComments}
             </li>
-            <li className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-              Güçlü performans
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-              Uzun pil ömrü
-            </li>
+           ))}
           </ul>
         </div>
 
@@ -41,14 +53,12 @@ function AiPreferenceCard() {
             Dikkat Edilmesi Gerek !
           </h4>
           <ul className="space-y-1.5 text-xs text-slate-700 font-medium">
-            <li className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
-              Şarj hızı
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
-              Gece kamerası
-            </li>
+            {cons.map((highlight, index) => (
+           <li key={index} className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
+            {highlight.aiComments}
+          </li>
+             ))}
           </ul>
         </div>
 
@@ -61,13 +71,17 @@ function AiPreferenceCard() {
         <div 
           className="w-full h-full rounded-full p-3.5 flex items-center justify-center"
           style={{
-            background: `conic-gradient(from 210deg, #ef4444 0% 18%, #facc15 18% 45%, #22c55e 45% 85%, #e2e8f0 85% 100%)`
-          }}
+          background: `conic-gradient(
+          from 210deg,
+          ${scoreColor} 0% ${scorePercentage}%,
+           #e2e8f0 ${scorePercentage}% 100%
+            )`
+         }}
         >
           {/* İçteki Beyaz Daire (Grafiğin Ortasını Delip Halka Yapar) */}
           <div className="w-full h-full bg-white rounded-full flex items-center justify-center gap-1 shadow-sm">
             <FaStar className="text-amber-400 text-lg" />
-            <span className="font-bold text-xl text-slate-900">4.5</span>
+            <span className="font-bold text-xl text-slate-900">{analysis.aiScore}</span>
           </div>
         </div>
 

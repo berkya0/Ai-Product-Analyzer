@@ -1,11 +1,11 @@
 import React from "react";
 import { FiBell } from "react-icons/fi";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaStarHalfAlt } from "react-icons/fa";
 
-function ProductResultCard({ product }) {
+function ProductResultCard({ product,aiSummary }) {
   // Dışarıdan prop gelmezse görseldeki verileri varsayılan olarak kullanır
   const data = product || {
-    title: "Samsung Galaxy A54 128GB 8GB Ram",
+    name: "Samsung Galaxy A54 128GB 8GB Ram",
     price: "17.999 TL",
     rating: 4.1,
     reviewCount: 120,
@@ -22,7 +22,7 @@ function ProductResultCard({ product }) {
       <div className="w-full sm:w-48 h-56 sm:h-auto shrink-0 rounded-xl overflow-hidden bg-slate-100">
         <img
           src={data.imageUrl}
-          alt={data.title}
+          alt={data.name}
           className="w-full h-full object-cover"
         />
       </div>
@@ -32,13 +32,13 @@ function ProductResultCard({ product }) {
         <div>
           {/* Başlık ve Altındaki Çizgi */}
           <h3 className="text-lg font-bold text-slate-900 border-b-2 border-slate-900 pb-1.5 leading-snug">
-            {data.title}
+            {data.name}
           </h3>
 
           {/* Fiyat ve Alarm (Zil) İkonu */}
           <div className="flex items-center justify-between mt-3">
             <span className="text-xl font-extrabold text-slate-900">
-              {data.price}
+              {data.price} TL
             </span>
             <button 
               title="Fiyat Takibi Oluştur"
@@ -49,22 +49,35 @@ function ProductResultCard({ product }) {
           </div>
 
           {/* Yıldız Puanı ve Değerlendirme Sayısı */}
-          <div className="flex items-center gap-1.5 mt-2">
-            <div className="flex text-amber-400 gap-0.5 text-sm">
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              <FaStar className="text-slate-300" /> {/* 4.1 olduğu için 5. yıldız gri */}
-            </div>
-            <span className="text-xs font-semibold text-slate-700">
-              ({data.rating}/5.0)
-            </span>
-            <span className="text-[11px] text-slate-400 ml-1">
-              {data.reviewCount} Değerlendirme
-            </span>
-          </div>
-        </div>
+          {/* Yıldız Puanı ve Değerlendirme Sayısı */}
+<div className="flex items-center gap-1.5 mt-2">
+  <div className="flex text-amber-400 gap-0.5 text-sm">
+    {[1, 2, 3, 4, 5].map((star) => {
+      if (data.rating >= star) {
+        return <FaStar key={star} />;
+      }
+
+      if (data.rating >= star - 0.5) {
+        return <FaStarHalfAlt key={star} />;
+      }
+
+      return (
+        <FaStar
+          key={star}
+          className="text-slate-300"
+        />
+      );
+    })}
+  </div>
+
+  <span className="text-xs font-semibold text-slate-700">
+    ({data.rating}/5.0)
+  </span>
+
+  <span className="text-[11px] text-slate-400 ml-1">
+    {data.reviewCount} Değerlendirme
+  </span>
+</div>
 
         {/* Hızlı Özet Bölümü */}
         <div className="mt-4">
@@ -72,11 +85,12 @@ function ProductResultCard({ product }) {
             Hızlı Özet
           </h4>
           <p className="text-xs text-slate-500 leading-relaxed">
-            {data.summary}
+            {aiSummary}
           </p>
         </div>
 
       </div>
+    </div>
     </div>
   );
 }

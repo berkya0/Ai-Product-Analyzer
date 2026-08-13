@@ -1,7 +1,7 @@
 import React from "react";
 import { FiSearch } from "react-icons/fi";
 
-function Searchbar({ placeholder = "Arama yapın...", className = "", onSearch }) {
+function Searchbar({ placeholder = "Arama yapın...", className = "", value,onChange,onSearch }) {
   return (
  
     <div className={`flex gap-3 ${className}`}>
@@ -11,6 +11,8 @@ function Searchbar({ placeholder = "Arama yapın...", className = "", onSearch }
         <input
           type="text"
           placeholder={placeholder} 
+          value={value}
+          onChange={onChange}
           className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-sm text-[#747373] placeholder-[#747373] focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-sm transition"
         />
       </div>

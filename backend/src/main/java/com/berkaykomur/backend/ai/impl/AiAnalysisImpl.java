@@ -28,19 +28,59 @@ public class AiAnalysisImpl implements AiAnalysis {
     }
     private AnalysisResult analyze(List<Comment> comments) {
         String prompt = """
-                Analyze the following product reviews.
+        Analyze the following product reviews and generate a structured product analysis.
 
-                Provide:
-                - An overall AI score between 0 and 5
-                - A short summary
-                - The most positive comment
-                - The most negative comment
-                - Important positive and negative highlights
-                - Sentiment analysis for important product features
+        All output text must be written in Turkish.
 
-                Reviews:
-                %s
-                """.formatted(formatComments(comments));
+        Provide the following:
+
+        1. aiScore
+        - Give the product an overall score between 0.0 and 5.0.
+        - Base the score only on the opinions expressed in the reviews.
+        - Consider overall customer satisfaction, product quality, common complaints,
+          and frequently mentioned positive aspects.
+
+        2. summary
+        - Write a short and objective summary of the overall customer opinion.
+        - Mention the most important strengths and weaknesses.
+        - Do not invent information that is not present in the reviews.
+
+        3. topPositiveComment
+        - Select the most useful and representative positive comment from the reviews.
+        - Prefer comments that provide specific information about the product.
+        - Do not rewrite or invent the comment.
+
+        4. topNegativeComment
+        - Select the most useful and representative negative comment from the reviews.
+        - Prefer comments that provide specific information about the product.
+        - Do not rewrite or invent the comment.
+
+        5. highlights
+        - Identify important recurring positive and negative points mentioned in the reviews.
+        - Each highlight must have:
+          - aiComments: a short description of the point
+          - commentType: either PRO or CON
+        - PRO must represent a positive aspect.
+        - CON must represent a negative aspect.
+        - Do not include points that are not supported by the reviews.
+        - Prioritize frequently mentioned and meaningful aspects.
+        - Avoid duplicates.
+
+        6. featureResults
+        - Identify important product features discussed in the reviews.
+        - Analyze the sentiment associated with each feature.
+        - Only include features that are actually mentioned in the reviews.
+
+        General rules:
+        - Base the entire analysis only on the provided reviews.
+        - Do not hallucinate or assume product specifications.
+        - Focus on recurring opinions rather than isolated comments.
+        - Keep the analysis concise and useful for a product comparison dashboard.
+        - Return the result in the exact structure expected by the application.
+
+        Reviews:
+        %s
+        """.formatted(formatComments(comments));
 
         return chatClient
                 .prompt()
