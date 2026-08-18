@@ -35,9 +35,8 @@ public class Product extends BaseEntity {
 
     @Builder.Default
     private boolean isFollowing=false;
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<Analysis> analyses=new ArrayList<>(); //Liste olmasını şuan kullanmıyorum
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL,orphanRemoval = true)
+    private Analysis analyses; //Liste olmasını şuan kullanmıyorum
 
 
 }

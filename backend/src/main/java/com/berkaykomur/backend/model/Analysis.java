@@ -21,7 +21,7 @@ public class Analysis extends BaseEntity {
     private Double aiScore;
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Status status=Status.PENDING;
+    private Status status=Status.PENDING; // not: Pending işlevi çalışması düşünülecek.
 
     @Column(columnDefinition = "TEXT")
     private String summary;
@@ -32,8 +32,8 @@ public class Analysis extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String topNegativeComment;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id",nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id",nullable = false,unique = true)
     private Product product;
 
 

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,16 +26,20 @@ public class ScrapperServiceImpl implements ScrapperService {
      @Override
      public ProductResponse executeScrapping(String productUrl){
          Scrapper scrapper=getScrapper(productUrl);
-         ScrapperResult productResponse= scrapper.scrap(productUrl);
-         Product product=productRepository.findByProductUrl(productUrl)
-                 .map(existingProduct-> {
-                     productMapper.updateProductFromDto(productResponse, existingProduct);
-                     return existingProduct;
-                 })
-                 .orElseGet(()-> {
-                     return productMapper.toProduct(productResponse);
-                 });
-         Product savedProduct= productRepository.save(product);
+         Optional<Product> product=productRepository.findByProductUrl(productUrl);
+//                 .map(existingProduct-> {
+//                     productMapper.updateProductFromDto(productResponse, existingProduct);
+//                     return existingProduct;
+//                 })
+//                 .orElseGet(()-> {
+//                     return productMapper.toProduct(productResponse);
+//                 });
+         if(product.isPresent()){
+            return productMapper.toProductResponse(product.get());
+         }
+         ScrapperResult scrapperResponse= scrapper.scrap(productUrl);
+         Product productResponse=productMapper.toProduct(scrapperResponse);
+         Product savedProduct= productRepository.save(productResponse);
         // aiAnalysisService.createAnalysis(scrapper,productUrl,product);
          return productMapper.toProductResponse(savedProduct);
      }

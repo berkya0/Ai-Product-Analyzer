@@ -6,10 +6,7 @@ import com.berkaykomur.backend.exception.ProductNotFoundException;
 import com.berkaykomur.backend.mapper.AnalysisHighLightMapper;
 import com.berkaykomur.backend.mapper.AnalysisMapper;
 import com.berkaykomur.backend.mapper.FeatureSentimentMapper;
-import com.berkaykomur.backend.model.Analysis;
-import com.berkaykomur.backend.model.AnalysisHighlight;
-import com.berkaykomur.backend.model.FeatureSentiment;
-import com.berkaykomur.backend.model.Product;
+import com.berkaykomur.backend.model.*;
 import com.berkaykomur.backend.repository.AnalysisRepository;
 import com.berkaykomur.backend.repository.ProductRepository;
 import com.berkaykomur.backend.scrapper.Scrapper;
@@ -19,9 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,20 +36,33 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
     public AnalysisResult createAnalysis (Long productId) {
         Product product=productRepository.findById(productId)
                 .orElseThrow(()->new ProductNotFoundException("Id'ye göre ürün bulunamadı: "+productId));
+        Optional<Analysis> analysis=analysisRepository.getAnalysisByProduct(product);
+
+        if(analysis.isPresent()){
+            return analysisMapper.toAnalysisResult(analysis.get());
+        }
+
         Scrapper scrapper=scrapperService.getScrapper(product.getProductUrl());
         String productUrl=product.getProductUrl();
+
         AnalysisResult analysisResult=aiAnalysis.analyzeComments(scrapper,productUrl);
-        if(analysisResult==null){
-            return null; //Hata konrtolü eklenecek
+        if(analysisResult==null ){
+            //hatalı durumda
+            Analysis failedAnalysis=Analysis.builder()
+                    .product(product)
+                    .status(Status.FAILED)
+                    .build();
+            analysisRepository.save(failedAnalysis);
+            return analysisMapper.toAnalysisResult(failedAnalysis);
         }
         List<AnalysisHighlight> analysisHighlightList=analysisHighLightMapper.toAnalysisHighlights(analysisResult.highlights());
         List<FeatureSentiment> featureSentiments=featureSentimentMapper.toFeatureSentiments(analysisResult.featureResults());
-        Analysis analysis=analysisMapper.toAnalysis(analysisResult);
-        analysisHighlightList.forEach(analysis::addHighlight);
-        featureSentiments.forEach(analysis::addFeatureSentiment);
-        analysis.setProduct(product);
-        analysisRepository.save(analysis);
-
+        Analysis analysiss=analysisMapper.toAnalysis(analysisResult);
+        analysisHighlightList.forEach(analysiss::addHighlight);
+        featureSentiments.forEach(analysiss::addFeatureSentiment);
+        analysiss.setProduct(product);
+        analysiss.setStatus(Status.SUCCESS);
+        analysisRepository.save(analysiss);
         return analysisResult;
 
     }

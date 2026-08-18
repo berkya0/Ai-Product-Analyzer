@@ -11,5 +11,11 @@ import java.util.List;
 public interface FeatureSentimentMapper {
 
     @Mapping(target = "analysis",ignore = true)
+    FeatureSentiment toFeatureSentiment(FeatureSentimentResult featureSentimentResult);
+    FeatureSentimentResult toFeatureSentimentResult(FeatureSentiment featureSentiment);
+
+    @Mapping(target = "analysis",ignore = true)
     List<FeatureSentiment> toFeatureSentiments(List<FeatureSentimentResult> featureSentimentResults);
+    List<FeatureSentimentResult> toFeatureSentimentResults(List<FeatureSentiment> featureSentiments);
+
 }

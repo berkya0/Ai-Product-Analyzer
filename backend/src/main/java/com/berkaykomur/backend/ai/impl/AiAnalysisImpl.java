@@ -3,13 +3,14 @@ package com.berkaykomur.backend.ai.impl;
 import com.berkaykomur.backend.ai.AiAnalysis;
 import com.berkaykomur.backend.dto.AnalysisResult;
 import com.berkaykomur.backend.dto.Comment;
-import com.berkaykomur.backend.model.Product;
 import com.berkaykomur.backend.scrapper.Scrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class AiAnalysisImpl implements AiAnalysis {
     private final ChatClient chatClient;
@@ -20,11 +21,17 @@ public class AiAnalysisImpl implements AiAnalysis {
 
     @Override
     public AnalysisResult analyzeComments(Scrapper scrapper, String productUrl){
-        List<Comment> comments=scrapper.commentScrap(productUrl);
-        if(comments.isEmpty()){
+        try {
+            List<Comment> comments = scrapper.commentScrap(productUrl);
+            if (comments.isEmpty()) {
+                return null;
+            }
+            return analyze(comments);
+
+        } catch (Exception e) {
+            log.error("Analiz sırasında hata oluştu", e);
             return null;
         }
-        return analyze(comments);
     }
     private AnalysisResult analyze(List<Comment> comments) {
         String prompt = """
@@ -82,11 +89,16 @@ public class AiAnalysisImpl implements AiAnalysis {
         %s
         """.formatted(formatComments(comments));
 
-        return chatClient
-                .prompt()
-                .user(prompt)
-                .call()
-                .entity(AnalysisResult.class);
+        try {
+            return chatClient
+                    .prompt()
+                    .user(prompt)
+                    .call()
+                    .entity(AnalysisResult.class);
+        } catch (Exception e) {
+            log.error("AI analizi sonucunda hata oluştu: {}", e.getMessage());
+            return null;
+        }
     }
 
     private String formatComments(List<Comment> comments) {
