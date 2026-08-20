@@ -41,6 +41,7 @@ function Home() {
         value={productUrl}
         onChange={(e)=>setProductUrl(e.target.value)}
         onSearch={handleScrap}
+        showButton={true}
       />
     
 

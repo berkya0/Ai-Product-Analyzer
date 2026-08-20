@@ -10,12 +10,14 @@ export async function scrapProduct(productUrl) {
     if (!response.ok) {
         throw new Error(data.message);
     }
-
     return data;
 }
 export async function getAnalysis(productId) {
     const response = await fetch(
-        `http://localhost:8080/ai/analyze/${productId}`
+        `http://localhost:8080/ai/analyze/${productId}`,
+        {
+            method:"POST",
+        }
     );
 
     const data = await response.json();
@@ -25,4 +27,18 @@ export async function getAnalysis(productId) {
     }
 
     return data;
+}
+
+export async function deleteProduct(productId) {
+    const response =await fetch(
+         `http://localhost:8080/product/delete/${productId}`,
+         {
+            method:"DELETE",
+         }
+         
+    );
+    if (!response.ok) {
+        throw new Error("Ürün bulunamadı");
+    }
+    
 }

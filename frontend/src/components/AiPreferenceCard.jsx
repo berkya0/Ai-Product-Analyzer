@@ -22,7 +22,7 @@ function AiPreferenceCard({analysis}) {
     scoreColor = "#22c55e";
   } 
   return (
-    <div className="bg-[#FFFFFC] rounded-2xl border border-[#E6C84A] p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center font-['Montserrat']">
+    <div className="bg-[#FFFFFC] rounded-2xl border border-[#E6C84A] p-6 shadow-sm grid grid-cols-1 md:grid-cols-[1fr_160px] gap-6 items-center font-['Montserrat']">
       
       {/* 1. SOL SÜTUN: İkon ve Özellik Listeleri */}
       <div className="flex-1 space-y-4">

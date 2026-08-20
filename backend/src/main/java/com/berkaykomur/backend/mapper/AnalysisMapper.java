@@ -8,7 +8,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring",
         uses = {
                 AnalysisHighLightMapper.class,
-                FeatureSentimentMapper.class
+                FeatureSentimentMapper.class,
+                ProductMapper.class,
         })
 public interface AnalysisMapper {
 
@@ -18,6 +19,7 @@ public interface AnalysisMapper {
     Analysis toAnalysis(AnalysisResult analysisResult);
 
     @Mapping(source = "featureSentiments", target = "featureResults")
+    @Mapping(source = "product", target = "scrappedProduct")
     AnalysisResult toAnalysisResult(Analysis analysis);
 
 }

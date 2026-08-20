@@ -1,7 +1,7 @@
 import React from "react";
 import { FiSearch } from "react-icons/fi";
 
-function Searchbar({ placeholder = "Arama yapın...", className = "", value,onChange,onSearch }) {
+function Searchbar({ placeholder = "Arama yapın...", className = "", value,onChange,onSearch ,showButton=false}) {
   return (
  
     <div className={`flex gap-3 ${className}`}>
@@ -17,12 +17,14 @@ function Searchbar({ placeholder = "Arama yapın...", className = "", value,onCh
         />
       </div>
 
-      <button 
-        onClick={onSearch}
-        className="bg-[#0F172A] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-slate-800 transition cursor-pointer shrink-0"
-      >
-        Analiz Et
-      </button>
+       {showButton && (
+        <button
+          onClick={onSearch}
+          className="bg-[#0F172A] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-slate-800 transition cursor-pointer shrink-0"
+        >
+          Analiz Et
+        </button>
+      )}
     </div>
   );
 }

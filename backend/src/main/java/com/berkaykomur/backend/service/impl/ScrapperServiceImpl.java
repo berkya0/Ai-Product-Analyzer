@@ -25,8 +25,7 @@ public class ScrapperServiceImpl implements ScrapperService {
      @Transactional
      @Override
      public ProductResponse executeScrapping(String productUrl){
-         Scrapper scrapper=getScrapper(productUrl);
-         Optional<Product> product=productRepository.findByProductUrl(productUrl);
+         Optional<Product> product=productRepository.findProductIncludingDeleted(productUrl);
 //                 .map(existingProduct-> {
 //                     productMapper.updateProductFromDto(productResponse, existingProduct);
 //                     return existingProduct;
@@ -35,14 +34,20 @@ public class ScrapperServiceImpl implements ScrapperService {
 //                     return productMapper.toProduct(productResponse);
 //                 });
          if(product.isPresent()){
+             productRepository.restoreProduct(product.get().getId());
             return productMapper.toProductResponse(product.get());
          }
-         ScrapperResult scrapperResponse= scrapper.scrap(productUrl);
-         Product productResponse=productMapper.toProduct(scrapperResponse);
-         Product savedProduct= productRepository.save(productResponse);
-        // aiAnalysisService.createAnalysis(scrapper,productUrl,product);
+         Product scrappedProduct=getScrappedProduct(productUrl);
+         Product savedProduct= productRepository.save(scrappedProduct);
          return productMapper.toProductResponse(savedProduct);
      }
+     @Override
+     public Product getScrappedProduct(String productUrl){
+         Scrapper scrapper=getScrapper(productUrl);
+         ScrapperResult scrapperResponse= scrapper.scrap(productUrl);
+         return productMapper.toProduct(scrapperResponse);
+     }
+
 
      @Override
      public Scrapper getScrapper(String productUrl){
