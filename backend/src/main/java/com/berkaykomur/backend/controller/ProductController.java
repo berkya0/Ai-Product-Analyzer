@@ -1,5 +1,6 @@
 package com.berkaykomur.backend.controller;
 
+import com.berkaykomur.backend.dto.AnalysisResult;
 import com.berkaykomur.backend.dto.ProductResponse;
 import com.berkaykomur.backend.service.ProductDetailService;
 import com.berkaykomur.backend.service.ScrapperService;

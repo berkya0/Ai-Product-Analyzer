@@ -22,6 +22,7 @@ public class ScrapperServiceImpl implements ScrapperService {
      private final ProductRepository productRepository;
      private final ProductMapper productMapper;
 
+
      @Transactional
      @Override
      public ProductResponse executeScrapping(String productUrl){
@@ -39,15 +40,16 @@ public class ScrapperServiceImpl implements ScrapperService {
          }
          Product scrappedProduct=getScrappedProduct(productUrl);
          Product savedProduct= productRepository.save(scrappedProduct);
+
          return productMapper.toProductResponse(savedProduct);
      }
+
      @Override
      public Product getScrappedProduct(String productUrl){
          Scrapper scrapper=getScrapper(productUrl);
          ScrapperResult scrapperResponse= scrapper.scrap(productUrl);
          return productMapper.toProduct(scrapperResponse);
      }
-
 
      @Override
      public Scrapper getScrapper(String productUrl){

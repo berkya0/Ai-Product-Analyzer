@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 @Builder
 public record ScrapperResult(
+        Long id,
         String name,
         String imageUrl,
         String productUrl,

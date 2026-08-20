@@ -2,8 +2,10 @@ package com.berkaykomur.backend.mapper;
 
 import com.berkaykomur.backend.dto.AnalysisResult;
 import com.berkaykomur.backend.model.Analysis;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring",
         uses = {
@@ -13,13 +15,24 @@ import org.mapstruct.Mapping;
         })
 public interface AnalysisMapper {
 
-    @Mapping(target = "highlights",ignore = true)
-    @Mapping(target = "featureSentiments",ignore = true)
+    @Mapping(target = "id",ignore = true)
     @Mapping(target = "product",ignore = true)
+    @Mapping(source = "featureResults", target ="featureSentiments")
     Analysis toAnalysis(AnalysisResult analysisResult);
 
+    @AfterMapping
+    default void setParentReferences(@MappingTarget Analysis analysis) {
+
+        if (analysis.getHighlights() != null) {
+            analysis.getHighlights().forEach(highlight -> highlight.setAnalysis(analysis));
+        }
+
+        if (analysis.getFeatureSentiments() != null) {
+            analysis.getFeatureSentiments().forEach(sentiment -> sentiment.setAnalysis(analysis));
+        }
+    }
+
     @Mapping(source = "featureSentiments", target = "featureResults")
-    @Mapping(source = "product", target = "scrappedProduct")
     AnalysisResult toAnalysisResult(Analysis analysis);
 
 }

@@ -10,11 +10,11 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "id",ignore = true)
     @Mapping(target = "analyses", ignore = true)
     Product toProduct(ScrapperResult scrapResult);
 
-    @Mapping(target = "id", ignore = true)
+
     @Mapping(target = "analyses", ignore = true)
     void updateProductFromDto(ScrapperResult scrapResult, @MappingTarget Product product);
 

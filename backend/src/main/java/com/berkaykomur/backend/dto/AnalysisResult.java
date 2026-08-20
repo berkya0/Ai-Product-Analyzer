@@ -4,7 +4,6 @@ import java.util.List;
 
 public record AnalysisResult(
          Long id,
-         ProductResponse scrappedProduct,
          Double aiScore,
          String summary,
          String topPositiveComment,
