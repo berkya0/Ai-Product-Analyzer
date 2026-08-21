@@ -9,6 +9,7 @@ public record DashboardProductsResponse(
         Long id,
         String name,
         String imageUrl,
+        String productUrl,
         Double aiScore,
         boolean isFollowing,
         Status status,

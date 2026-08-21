@@ -16,6 +16,7 @@ public interface ProductMapper {
 
 
     @Mapping(target = "analyses", ignore = true)
+    @Mapping(target = "id",ignore = true)
     void updateProductFromDto(ScrapperResult scrapResult, @MappingTarget Product product);
 
     ProductResponse toProductResponse(Product product);

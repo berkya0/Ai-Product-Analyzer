@@ -32,6 +32,10 @@ public interface AnalysisMapper {
         }
     }
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "product", ignore = true)
+    void updateAnalysisFromDto(AnalysisResult result, @MappingTarget Analysis analysis);
+
     @Mapping(source = "featureSentiments", target = "featureResults")
     AnalysisResult toAnalysisResult(Analysis analysis);
 

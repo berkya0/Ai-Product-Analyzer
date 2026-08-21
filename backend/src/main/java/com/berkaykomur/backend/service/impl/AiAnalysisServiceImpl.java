@@ -30,16 +30,17 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
 
     @Transactional
     @Override
-    public AnalysisResult createAnalysis (Scrapper scrapper,Long productId) {
+    public AnalysisResult createAnalysis (Scrapper scrapper,Long productId,boolean forceRefresh) {
         log.info("Analiz süreci başlatıldı. Product ID: {}", productId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Id'ye göre ürün bulunamadı: " + productId));
 
-        Optional<Analysis> analysis = analysisRepository.getAnalysisByProduct_Id(productId);
-        if(analysis.isPresent()){
+        Optional<Analysis> existingAnalysisOp = analysisRepository.getAnalysisByProduct_Id(productId);
+        if(existingAnalysisOp.isPresent()&&!forceRefresh){
             log.info("Veritabanında mevcut analiz bulundu. Yeniden AI isteği atılmayacak. Product ID: {}", productId);
-            return analysisMapper.toAnalysisResult(analysis.get());
+            return analysisMapper.toAnalysisResult(existingAnalysisOp.get());
         }
+
         String productUrl=product.getProductUrl();
         log.debug("Yapay zeka analizi için istek atılıyor. URL: {}", productUrl);
         AnalysisResult analysisResult=aiAnalysis.analyzeComments(scrapper,productUrl);
@@ -53,13 +54,20 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
             return analysisMapper.toAnalysisResult(failedAnalysis);
         }
 
-        Analysis toAnalysis=analysisMapper.toAnalysis(analysisResult);
-        toAnalysis.setProduct(product);
-        toAnalysis.setStatus(Status.SUCCESS);
-        log.info("Yapay zeka analizi başarıyla tamamlandı. Veritabanına kaydediliyor. Product ID: {}", productId);
-        analysisRepository.save(toAnalysis);
+        Analysis analysisEntity;
+        if (existingAnalysisOp.isPresent()) {
+            log.info("Daha önceden analiz edilen ürün tekrar analiz ediliyor. Product ID: {}", productId);
+            analysisEntity = existingAnalysisOp.get();
+            analysisMapper.updateAnalysisFromDto(analysisResult, analysisEntity);
+        } else {
+            analysisEntity = analysisMapper.toAnalysis(analysisResult);
+        }
 
-        return analysisMapper.toAnalysisResult(toAnalysis);
+        analysisEntity.setProduct(product);
+        analysisEntity.setStatus(Status.SUCCESS);
+        log.info("Yapay zeka analizi başarılı oldu");
+        analysisRepository.save(analysisEntity);
+        return analysisMapper.toAnalysisResult(analysisEntity);
 
     }
 

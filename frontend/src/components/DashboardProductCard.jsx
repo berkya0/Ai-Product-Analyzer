@@ -76,7 +76,11 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute }) {
         </button>
 
         <button 
-          onClick={() => onRefresh(item.id)}
+           onClick={() => {
+        console.log("ITEM:", item);
+        console.log("PRODUCT URL:", item?.productUrl);
+        onRefresh(item?.id, item?.productUrl);
+    }}
           className="hover:text-black transition-colors"
           title="Yenile"
         >
@@ -84,7 +88,7 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute }) {
         </button>
 
         <button 
-          onClick={() => onDelete(item.id)}
+          onClick={() => onDelete(item?.id)}
           className="hover:text-red-600 transition-colors"
           title="Sil"
         >

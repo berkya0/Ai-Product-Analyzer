@@ -39,6 +39,7 @@ public class DashboardServiceImpl implements DashboardService {
                     product.getId(),
                     product.getName(),
                     product.getImageUrl(),
+                    product.getProductUrl(),
                     analysis.getAiScore(),
                     product.isFollowing(),
                     analysis.getStatus(),

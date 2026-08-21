@@ -67,32 +67,24 @@ function Home() {
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
             <div>
-              <h2 className="text-slate-700 font-bold mb-3 text-lg">
-                Ürün Sonuç
-              </h2>
+              
               {/* aiSummary state'i yerine doğrudan analysis.summary yolluyoruz */}
               <ProductResultCard product={product} aiSummary={analysis.summary}/>
             </div>
 
             <div>
-              <h2 className="text-slate-700 font-bold mb-3 text-lg">
-                AI Tercihi
-              </h2>
+              
               <AiPreferenceCard analysis={analysis}/>
             </div>
           </div>
 
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-10 mr-50 mt-8'>
             <div>
-              <h2 className="text-slate-700 font-bold mb-3 text-lg">
-                En Çok Sevilen Özellikler
-              </h2>
+             
               <MostLikedFeatures analysis={analysis} type="LOVED"/>
             </div>
             <div>
-              <h2 className="text-slate-700 font-bold mb-3 text-lg">
-                En Çok Şikayet Edilen Özellikler
-              </h2>
+             
               <MostLikedFeatures analysis={analysis} type="COMPLAINED"/>
             </div>
           </div>

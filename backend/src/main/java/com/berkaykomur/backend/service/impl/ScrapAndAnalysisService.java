@@ -19,11 +19,11 @@ public class ScrapAndAnalysisService {
     private final AiAnalysisService aiAnalysisService;
 
     @Transactional
-    public ProductAnalysisCombinedResponse scrapAndAnalysis(String productUrl){
+    public ProductAnalysisCombinedResponse scrapAndAnalysis(String productUrl,boolean forceRefresh){
 
-        ProductResponse scrappedProduct=scrapperService.executeScrapping(productUrl);
+        ProductResponse scrappedProduct=scrapperService.executeScrapping(productUrl,forceRefresh);
         Scrapper scrapper=scrapperService.getScrapper(productUrl);
-        AnalysisResult analysisResult= aiAnalysisService.createAnalysis(scrapper,scrappedProduct.id());
+        AnalysisResult analysisResult= aiAnalysisService.createAnalysis(scrapper,scrappedProduct.id(),forceRefresh);
 
         return  new ProductAnalysisCombinedResponse(scrappedProduct,analysisResult);
 

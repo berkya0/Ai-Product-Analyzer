@@ -15,10 +15,10 @@ public class ProductController {
 
     private final ScrapperService scrapperService;
     private final ProductDetailService productDetailService;
-    @PostMapping("scrap")
-    public ResponseEntity<ProductResponse> scrap(@RequestParam String productUrl) {
-        return ResponseEntity.ok(scrapperService.executeScrapping(productUrl));
-    }
+//    @PostMapping("scrap")
+//    public ResponseEntity<ProductResponse> scrap(@RequestParam String productUrl) {
+//        return ResponseEntity.ok(scrapperService.executeScrapping(productUrl));
+//    } //çalışmıyor şuanlık silinebilir
 
     @GetMapping("get/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {

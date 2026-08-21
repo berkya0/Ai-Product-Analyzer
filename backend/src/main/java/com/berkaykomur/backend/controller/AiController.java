@@ -16,7 +16,13 @@ public class AiController {
 
     @PostMapping("/analyze")
     public ResponseEntity<ProductAnalysisCombinedResponse> analyzeComments(@RequestBody ProductAnalyzeRequest request) {
-        return ResponseEntity.ok(scrapAndAnalysisService.scrapAndAnalysis(request.productUrl()));
+        return ResponseEntity.ok(scrapAndAnalysisService.scrapAndAnalysis(request.productUrl(),false));
+
+
+    }
+    @PostMapping("/re-analyze")
+    public ResponseEntity<ProductAnalysisCombinedResponse> reAnalyzeComments(@RequestBody ProductAnalyzeRequest request) {
+        return ResponseEntity.ok(scrapAndAnalysisService.scrapAndAnalysis(request.productUrl(), true));
     }
 }
 

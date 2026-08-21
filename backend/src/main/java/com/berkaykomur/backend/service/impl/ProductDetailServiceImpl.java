@@ -21,10 +21,5 @@ public class ProductDetailServiceImpl implements ProductDetailService {
         productRepository.delete(product);
     }
 
-    public void reProduct(String productUrl){
-        Product scrappedProduct=scrapperService.getScrappedProduct(productUrl);
-        productRepository.save(scrappedProduct);
-
-    }
 
 }

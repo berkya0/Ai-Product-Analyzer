@@ -1,7 +1,7 @@
 import PageHeader from "../components/PageHeader";
 import StateCards from "../components/StateCards";
 import { useEffect, useState } from "react";
-import { fetchStates, fetchProducts } from "../services/dashboardService";
+import { fetchStates, fetchProducts,reAnalyzeProduct} from "../services/dashboardService";
 import DashboardProducts from "../components/DashboardProductCard";
 
 import '@fontsource/montserrat';
@@ -38,6 +38,7 @@ function Dashboard() {
             setLoading(false);
         }
         loadProducts();
+        
     }, [currentPage]);
 
     // Scroll olayını dinleyen fonksiyon
@@ -61,7 +62,27 @@ function Dashboard() {
     } catch (error) {
         console.error(error);
     }
-}
+    }
+    async function handleReAnalyze(id, productUrl) {
+        try {
+            
+            const updatedData = await reAnalyzeProduct(productUrl);
+            setDashboardProducts(prev => ({
+                ...prev,
+                content: prev.content.map(product => 
+                
+                    product.id === id ? { ...product, ...updatedData } : product
+                )
+            }));
+            
+            //Tost mesajı eklenebilir ileride
+            console.log("Ürün başarıyla güncellendi!");
+
+        } catch (error) {
+            console.error("Yeniden analiz sırasında hata:", error);
+            alert("Analiz güncellenirken bir hata oluştu: " + error.message);
+        }
+    }
 
     return (
         <div className="font-[Montserrat] p-8 min-h-screen flex flex-col gap-5">
@@ -82,7 +103,7 @@ function Dashboard() {
                 className="flex flex-col gap-2 mt-4 max-h-[550px] overflow-y-auto pr-2 custom-scrollbar"
             >
                 {dashboardProducts?.content?.map((product, index) => (
-                    <DashboardProducts key={`${product.id}-${index}`} item={product} onDelete={handleDelete}/>
+                    <DashboardProducts key={`${product.id}-${index}`} item={product} onDelete={handleDelete} onRefresh={handleReAnalyze}/>
                 ))}
 
                 {/* Yükleniyor Göstergesi */}
