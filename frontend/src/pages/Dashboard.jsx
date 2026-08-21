@@ -1,7 +1,7 @@
 import PageHeader from "../components/PageHeader";
 import StateCards from "../components/StateCards";
 import { useEffect, useState } from "react";
-import { fetchStates, fetchProducts,reAnalyzeProduct} from "../services/dashboardService";
+import { fetchStates, fetchProducts,reAnalyzeProduct,setProductFollowing} from "../services/dashboardService";
 import DashboardProducts from "../components/DashboardProductCard";
 
 import '@fontsource/montserrat';
@@ -21,7 +21,7 @@ function Dashboard() {
             setDashboardStats(data);
         }
         loadDashboard();
-    }, []);
+    }, [dashboardStats]);
 
     useEffect(() => {
         async function loadProducts() {
@@ -83,6 +83,24 @@ function Dashboard() {
             alert("Analiz güncellenirken bir hata oluştu: " + error.message);
         }
     }
+    async function handleToggleMute(id, currentIsFollowing) {
+    try {
+        
+        const newFollowingStatus = !currentIsFollowing;
+        await setProductFollowing(id, newFollowingStatus);
+
+        setDashboardProducts(prev => ({
+            ...prev,
+            content: prev.content.map(product => 
+                product.id === id ? { ...product, isFollowing: newFollowingStatus } : product
+            )
+        }));
+
+    } catch (error) {
+        console.error("Takip işlemi başarısız:", error);
+        alert("Takip durumu değiştirilemedi.");
+    }
+}
 
     return (
         <div className="font-[Montserrat] p-8 min-h-screen flex flex-col gap-5">
@@ -103,7 +121,7 @@ function Dashboard() {
                 className="flex flex-col gap-2 mt-4 max-h-[550px] overflow-y-auto pr-2 custom-scrollbar"
             >
                 {dashboardProducts?.content?.map((product, index) => (
-                    <DashboardProducts key={`${product.id}-${index}`} item={product} onDelete={handleDelete} onRefresh={handleReAnalyze}/>
+                    <DashboardProducts key={`${product.id}-${index}`} item={product} onDelete={handleDelete} onRefresh={handleReAnalyze} onToggleMute={handleToggleMute}/>
                 ))}
 
                 {/* Yükleniyor Göstergesi */}

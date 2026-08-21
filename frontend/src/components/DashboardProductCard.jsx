@@ -68,7 +68,7 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute }) {
       {/* 5. Aksiyon Butonları */}
       <div className="flex items-center space-x-4 text-slate-700">
         <button 
-          onClick={() => onToggleMute(item?.id)}
+          onClick={() => onToggleMute(item?.id,item?.isFollowing)}
           className="hover:text-black transition-colors"
           title={item?.isFollowing ? "Takipten çık" : "Takibe al"}
         >
@@ -77,8 +77,6 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute }) {
 
         <button 
            onClick={() => {
-        console.log("ITEM:", item);
-        console.log("PRODUCT URL:", item?.productUrl);
         onRefresh(item?.id, item?.productUrl);
     }}
           className="hover:text-black transition-colors"

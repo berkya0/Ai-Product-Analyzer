@@ -59,4 +59,26 @@ export async function reAnalyzeProduct(productUrl) {
     throw error; 
   }
 }
+export async function setProductFollowing(productId, isFollowing) {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/dashboard/set-following/${productId}/follow?isFollowing=${isFollowing}`, 
+      {
+        method: "PATCH",
+      }
+    );
+
+    if (!response.ok) {
+        const errorData = await response.text().catch(() => null); 
+        throw new Error(errorData || `HTTP Hatası! Statü: ${response.status}`);
+    }
+    return true;
+    
+  } catch (error) {
+    console.error("Takip durumu güncellenirken hata oluştu:", error);
+    throw error; 
+  }
+}
+
+
 
