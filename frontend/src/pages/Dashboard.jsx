@@ -1,12 +1,14 @@
 import PageHeader from "../components/PageHeader";
 import StateCards from "../components/StateCards";
 import { useEffect, useState } from "react";
-import { fetchStates, fetchProducts,reAnalyzeProduct,setProductFollowing} from "../services/dashboardService";
+// DİKKAT: setProductFollowing'i buradan sildik çünkü Hook hallediyor
+import { fetchStates, fetchProducts, reAnalyzeProduct } from "../services/dashboardService"; 
 import DashboardProducts from "../components/DashboardProductCard";
 
 import '@fontsource/montserrat';
 import Searchbar from "../components/Searchbar";
 import { deleteProduct } from "../services/productService";
+import { useToggleFollow } from "../hooks/useToggleFollow"; // HOOK'U IMPORT ETTİK
 
 function Dashboard() {
     const [dashboardStats, setDashboardStats] = useState(null);
@@ -15,13 +17,16 @@ function Dashboard() {
     const [loading, setLoading] = useState(false);
     const pageSize = 6;
 
+    // HOOK'U ÇAĞIRIYORUZ
+    const { toggle } = useToggleFollow();
+
     useEffect(() => {
         async function loadDashboard() {
             const data = await fetchStates();
             setDashboardStats(data);
         }
         loadDashboard();
-    }, [dashboardStats]);
+    }, []);
 
     useEffect(() => {
         async function loadProducts() {
@@ -41,7 +46,6 @@ function Dashboard() {
         
     }, [currentPage]);
 
-    // Scroll olayını dinleyen fonksiyon
     const handleScroll = (e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
         
@@ -51,56 +55,58 @@ function Dashboard() {
             }
         }
     };
-    async function handleDelete(id) {
-    try {
-        await deleteProduct(id);
 
-        setDashboardProducts(prev => ({
-            ...prev,
-            content: prev.content.filter(product => product.id !== id)
-        }));
-    } catch (error) {
-        console.error(error);
+    async function handleDelete(id) {
+        try {
+            await deleteProduct(id);
+            setDashboardProducts(prev => ({
+                ...prev,
+                content: prev.content.filter(product => product.id !== id)
+            }));
+        } catch (error) {
+            console.error(error);
+        }
     }
-    }
+
     async function handleReAnalyze(id, productUrl) {
         try {
-            
             const updatedData = await reAnalyzeProduct(productUrl);
             setDashboardProducts(prev => ({
                 ...prev,
                 content: prev.content.map(product => 
-                
                     product.id === id ? { ...product, ...updatedData } : product
                 )
             }));
-            
-            //Tost mesajı eklenebilir ileride
             console.log("Ürün başarıyla güncellendi!");
-
         } catch (error) {
             console.error("Yeniden analiz sırasında hata:", error);
             alert("Analiz güncellenirken bir hata oluştu: " + error.message);
         }
     }
-    async function handleToggleMute(id, currentIsFollowing) {
-    try {
-        
-        const newFollowingStatus = !currentIsFollowing;
-        await setProductFollowing(id, newFollowingStatus);
 
-        setDashboardProducts(prev => ({
-            ...prev,
-            content: prev.content.map(product => 
-                product.id === id ? { ...product, isFollowing: newFollowingStatus } : product
-            )
-        }));
+    // YENİ VE TERTEMİZ HOOK KULLANIMI
+    const handleToggleMute = (id, currentIsFollowing) => {
+        toggle(id, currentIsFollowing, (newFollowingStatus) => {
+            // 1. Tablodaki ürünü güncelle
+            setDashboardProducts(prev => ({
+                ...prev,
+                content: prev.content.map(product => 
+                    product.id === id ? { ...product, isFollowing: newFollowingStatus } : product
+                )
+            }));
 
-    } catch (error) {
-        console.error("Takip işlemi başarısız:", error);
-        alert("Takip durumu değiştirilemedi.");
-    }
-}
+            // 2. Renkli istatistik kartını güncelle
+            setDashboardStats(prevStats => {
+                if (!prevStats) return prevStats; 
+                return {
+                    ...prevStats,
+                    totalFollowedAnalysis: newFollowingStatus 
+                        ? prevStats.totalFollowedAnalysis + 1 
+                        : prevStats.totalFollowedAnalysis - 1
+                };
+            });
+        });
+    };
 
     return (
         <div className="font-[Montserrat] p-8 min-h-screen flex flex-col gap-5">
@@ -115,7 +121,6 @@ function Dashboard() {
 
             <Searchbar className="mt-15" />
             
-            {/* Scroll Eklenen Ürün Listesi Kapsayıcısı */}
             <div 
                 onScroll={handleScroll}
                 className="flex flex-col gap-2 mt-4 max-h-[550px] overflow-y-auto pr-2 custom-scrollbar"
@@ -124,7 +129,6 @@ function Dashboard() {
                     <DashboardProducts key={`${product.id}-${index}`} item={product} onDelete={handleDelete} onRefresh={handleReAnalyze} onToggleMute={handleToggleMute}/>
                 ))}
 
-                {/* Yükleniyor Göstergesi */}
                 {loading && (
                     <div className="text-center py-3 text-sm text-slate-500 font-semibold">
                         Ürünler yükleniyor...

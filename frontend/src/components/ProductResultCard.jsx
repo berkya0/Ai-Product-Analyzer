@@ -1,8 +1,8 @@
 import React from "react";
-import { FiBell } from "react-icons/fi";
+import { FiBell, FiBellOff } from "react-icons/fi";
 import { FaStar, FaStarHalfAlt } from "react-icons/fa";
 
-function ProductResultCard({ product,aiSummary }) {
+function ProductResultCard({ product,aiSummary,onToggleFollow}) {
   // Dışarıdan prop gelmezse görseldeki verileri varsayılan olarak kullanır
   const data = product || {
     name: "Samsung Galaxy A54 128GB 8GB Ram",
@@ -40,11 +40,20 @@ function ProductResultCard({ product,aiSummary }) {
             <span className="text-xl font-extrabold text-slate-900">
               {data.price} TL
             </span>
-            <button 
-              title="Fiyat Takibi Oluştur"
-              className="p-1.5 text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+           <button 
+              title={data?.isFollowing ? "Takipten Çıkar" : "Fiyat Takibi Oluştur"}
+              className={`p-2 rounded-lg transition cursor-pointer flex items-center justify-center ${
+                data?.isFollowing 
+                  ? "bg-blue-50 text-blue-600 hover:bg-blue-100" 
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+              onClick={() => onToggleFollow && onToggleFollow(data?.id, data?.isFollowing)}
             >
-              <FiBell className="w-6 h-6" />
+              {data?.isFollowing ? (
+                <FiBellOff className="w-6 h-6" />
+              ) : (
+                <FiBell className="w-6 h-6" />
+              )}
             </button>
           </div>
 
