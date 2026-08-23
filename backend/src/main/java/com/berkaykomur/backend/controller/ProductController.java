@@ -1,12 +1,15 @@
 package com.berkaykomur.backend.controller;
 
-import com.berkaykomur.backend.dto.AnalysisResult;
+import com.berkaykomur.backend.dto.CompareRequest;
+import com.berkaykomur.backend.dto.CompareResults;
 import com.berkaykomur.backend.dto.ProductResponse;
-import com.berkaykomur.backend.service.ProductDetailService;
+import com.berkaykomur.backend.service.ProductService;
 import com.berkaykomur.backend.service.ScrapperService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/product")
@@ -14,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ScrapperService scrapperService;
-    private final ProductDetailService productDetailService;
+    private final ProductService productService;
 //    @PostMapping("scrap")
 //    public ResponseEntity<ProductResponse> scrap(@RequestParam String productUrl) {
 //        return ResponseEntity.ok(scrapperService.executeScrapping(productUrl));
@@ -27,7 +30,17 @@ public class ProductController {
     }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productDetailService.deleteProductDetailById(id);
+        productService.deleteProductDetailById(id);
         return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/set-following/{productId}/follow")
+    public ResponseEntity<Void> setFollowing(@PathVariable Long productId,@RequestParam boolean isFollowing){
+        productService.setFollow(productId,isFollowing);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/compare")
+    public ResponseEntity<List<CompareResults>> compareProducts(@RequestBody CompareRequest request) {
+        return ResponseEntity.ok(productService.compareProducts(request.productIds()));
+
     }
 }

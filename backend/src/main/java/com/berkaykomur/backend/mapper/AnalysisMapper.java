@@ -1,6 +1,7 @@
 package com.berkaykomur.backend.mapper;
 
 import com.berkaykomur.backend.dto.AnalysisResult;
+import com.berkaykomur.backend.dto.CompareResults;
 import com.berkaykomur.backend.model.Analysis;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -38,5 +39,13 @@ public interface AnalysisMapper {
 
     @Mapping(source = "featureSentiments", target = "featureResults")
     AnalysisResult toAnalysisResult(Analysis analysis);
+
+    @Mapping(source = "product.id", target = "id")
+    @Mapping(source = "product.name", target = "name")
+    @Mapping(source = "product.imageUrl", target = "imageUrl")
+    @Mapping(source = "product.reviewCount", target = "reviewCount")
+    @Mapping(source = "product.ratingCount", target = "ratingCount")
+    @Mapping(source = "product.price",target = "price")
+    CompareResults toCompareResults(Analysis analysis);
 
 }

@@ -27,13 +27,7 @@ public class ScrapperServiceImpl implements ScrapperService {
      @Override
      public ProductResponse executeScrapping(String productUrl,boolean forceRefresh){
          Optional<Product> product=productRepository.findProductIncludingDeleted(productUrl);
-//                 .map(existingProduct-> {
-//                     productMapper.updateProductFromDto(productResponse, existingProduct);
-//                     return existingProduct;
-//                 })
-//                 .orElseGet(()-> {
-//                     return productMapper.toProduct(productResponse);
-//                 });
+
          if(product.isPresent()&&!forceRefresh){
              productRepository.restoreProduct(product.get().getId());
             return productMapper.toProductResponse(product.get());

@@ -62,7 +62,7 @@ export async function reAnalyzeProduct(productUrl) {
 export async function setProductFollowing(productId, isFollowing) {
   try {
     const response = await fetch(
-      `http://localhost:8080/dashboard/set-following/${productId}/follow?isFollowing=${isFollowing}`, 
+      `http://localhost:8080/product/set-following/${productId}/follow?isFollowing=${isFollowing}`, 
       {
         method: "PATCH",
       }

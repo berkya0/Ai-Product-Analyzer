@@ -32,4 +32,20 @@ export async function deleteProduct(productId) {
         throw new Error("Ürün bulunamadı");
     }
     
+    
+}
+export async function compareProducts(productIds) {
+    const response = await fetch("http://localhost:8080/product/compare", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productIds }),
+    });
+
+    if (!response.ok) {
+        throw new Error("Karşılaştırma isteği başarısız oldu.");
+    }
+
+    return await response.json();
 }

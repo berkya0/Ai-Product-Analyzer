@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import Compare from "./pages/Compare";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
            <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/compare" element ={<Compare></Compare>}></Route>
         </Routes>
 
         </div>

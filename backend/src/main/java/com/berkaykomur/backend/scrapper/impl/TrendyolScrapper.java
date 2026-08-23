@@ -125,7 +125,8 @@ public class TrendyolScrapper implements Scrapper {
         return comments;
     }
 
-    private long extractContentId(String productUrl) {
+    @Override
+    public long extractContentId(String productUrl) {
         try {
             String path = URI.create(productUrl).getPath();
             int index = path.lastIndexOf("-p-");
@@ -142,7 +143,8 @@ public class TrendyolScrapper implements Scrapper {
             throw new InvalidProductUrlException("");
         }
     }
-    private JsonNode require(JsonNode node, String field) {
+    @Override
+    public JsonNode require(JsonNode node, String field) {
         JsonNode value = node.get(field);
         if (value == null || value.isNull()) {
             throw new ProductParsingException(
