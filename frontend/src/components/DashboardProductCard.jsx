@@ -9,7 +9,7 @@ import {
   Trash2 
 } from 'lucide-react';
 
-function DashboardProducts({ item, onDelete, onRefresh, onToggleMute }) {
+function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductClick }) {
   function getScoreBadgeClass(score) {
     if (score < 60) return 'bg-red-200 text-red-600';
     if (score < 80) return 'bg-yellow-200 text-yellow-700';
@@ -19,8 +19,11 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute }) {
   return (
     <div className="grid grid-cols-[1fr_100px_160px_130px_120px] items-center p-4 bg-white hover:shadow-md transition-shadow gap-7">
       
-      {/* 1. Sol Kısım: Görsel, Başlık ve Tarih */}
-      <div className="flex items-center space-x-4 min-w-[280px]">
+      {/* 1. Sol Kısım: Görsel, Başlık ve Tarih - BURAYI TIKLANABİLİR YAPTIK */}
+      <div 
+        className="flex items-center space-x-4 min-w-[280px] cursor-pointer hover:opacity-75 transition-opacity"
+        onClick={() => onProductClick(item?.id)}
+      >
         <img 
           src={item?.imageUrl} 
           alt={item?.name} 
@@ -37,8 +40,8 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute }) {
 
       {/* 2. Skor Rozeti */}
       <div className="flex justify-center min-w-[60px]">
-        <span className={`px-3 py-1.5 rounded-xl font-bold text-sm ${getScoreBadgeClass(item?.aiScore*100/5)}`}>
-          {item?.aiScore}
+        <span className={`px-3 py-1.5 rounded-xl font-bold text-sm ${getScoreBadgeClass(item?.aiScore*20)}`}>
+          {item?.aiScore*20}
         </span>
       </div>
 

@@ -36,7 +36,10 @@ public class Product extends BaseEntity {
     @Builder.Default
     private boolean isFollowing=false;
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL,orphanRemoval = true)
-    private Analysis analyses; //Liste olmasını şuan kullanmıyorum
+    private Analysis analyses;
+    @Column(nullable = false)
+    @Builder.Default
+    private String category="Diğer";
 
 
 }

@@ -7,28 +7,30 @@ import com.berkaykomur.backend.exception.JsonLdNotFoundException;
 import com.berkaykomur.backend.exception.ProductParsingException;
 import com.berkaykomur.backend.exception.ScrapingConnectionException;
 import com.berkaykomur.backend.scrapper.Scrapper;
-import lombok.extern.slf4j.Slf4j;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TrendyolScrapper implements Scrapper {
 
-    final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final int MAX_COMMENT_PAGES = 20;
 
     @Override
     public ScrapperResult scrap(String productUrl) {
@@ -38,34 +40,80 @@ public class TrendyolScrapper implements Scrapper {
                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
                     .get();
         } catch (IOException e) {
-            throw new ScrapingConnectionException(e.getMessage());
+            throw new ScrapingConnectionException("İlgili siteye bağlanılamadı: " + productUrl, e);
         }
 
-        Element jsonLdScript = document.selectFirst("script[type=application/ld+json]");
-        if (jsonLdScript == null) {
-            throw new JsonLdNotFoundException("");
+        Elements jsonLdScripts = document.select("script[type=application/ld+json]");
+        if (jsonLdScripts.isEmpty()) {
+            throw new JsonLdNotFoundException("Sayfada hiçbir application/ld+json etiketi bulunamadı");
         }
-        JsonNode root;
-        root = objectMapper.readTree(jsonLdScript.data());
 
-        JsonNode offers = require(root, "offers");
-        JsonNode aggregateRating = require(root, "aggregateRating");
-        JsonNode image = require(root, "image");
+        JsonNode productNode = null;
+        JsonNode webPageNode = null;
+
+        for (Element script : jsonLdScripts) {
+            try {
+                JsonNode node = objectMapper.readTree(script.data());
+
+                // JSON bir dizi (array) olarak gelmişse ilk elemanı al
+                if (node.isArray() && !node.isEmpty()) {
+                    node = node.get(0);
+                }
+
+                if (node.has("@type")) {
+                    String type = node.get("@type").asText();
+                    if ("ProductGroup".equalsIgnoreCase(type) || "Product".equalsIgnoreCase(type)) {
+                        // aggregateRating barındıran node'a öncelik ver (ezilmeyi engeller)
+                        if (productNode == null || node.hasNonNull("aggregateRating")) {
+                            productNode = node;
+                        }
+                    } else if ("WebPage".equalsIgnoreCase(type) && node.has("breadcrumb")) {
+                        webPageNode = node;
+                    }
+                }
+            } catch (Exception ignored) {
+                // İlgisiz veya hatalı formattaki scriptleri sessizce atlıyoruz
+            }
+        }
+
+        if (productNode == null) {
+            throw new ProductParsingException("Sayfada @type='Product' olan JSON-LD etiketi bulunamadı.");
+        }
+
+        String name = require(productNode, "name").asText();
+        JsonNode offers = require(productNode, "offers");
+        BigDecimal price = new BigDecimal(require(offers, "price").asText());
+
+        JsonNode image = require(productNode, "image");
         JsonNode contentUrls = require(image, "contentUrl");
-
         if (!contentUrls.isArray() || contentUrls.isEmpty()) {
-            throw new ProductParsingException("Ürün resmi çekilemedi ."+contentUrls);
+            throw new ProductParsingException("Ürün resmi çekilemedi: " + contentUrls);
+        }
+        String imageUrl = contentUrls.get(0).asText();
+
+        int ratingCount = 0;
+        int reviewCount = 0;
+        double rating = 0.0;
+        if (productNode.hasNonNull("aggregateRating")) {
+            JsonNode aggregateRating = productNode.get("aggregateRating");
+            ratingCount = aggregateRating.path("ratingCount").asInt(0);
+            reviewCount = aggregateRating.path("reviewCount").asInt(0);
+            rating = aggregateRating.path("ratingValue").asDouble(0.0);
         }
 
-        String name = require(root, "name").asText();
+        String categoryPath = "Diğer";
 
-        BigDecimal price = new BigDecimal(
-                require(offers, "price").asText()
-        );
-        String imageUrl = contentUrls.get(0).asText();
-        int ratingCount = require(aggregateRating, "ratingCount").asInt();
-        int reviewCount = require(aggregateRating, "reviewCount").asInt();
-        double rating = require(aggregateRating, "ratingValue").asDouble();
+        if (webPageNode != null) {
+            JsonNode itemList = webPageNode.path("breadcrumb").path("itemListElement");
+            if (itemList.isArray() && !itemList.isEmpty()) {
+                // En spesifik (en alt) kategoriyi al
+                JsonNode targetNode = itemList.get(itemList.size() - 1);
+                String categoryName = targetNode.path("item").path("name").asText("");
+                if (!categoryName.isEmpty()) {
+                    categoryPath = categoryName;
+                }
+            }
+        }
 
         return ScrapperResult.builder()
                 .name(name)
@@ -75,52 +123,99 @@ public class TrendyolScrapper implements Scrapper {
                 .rating(rating)
                 .reviewCount(reviewCount)
                 .ratingCount(ratingCount)
+                .category(categoryPath)
                 .build();
     }
+
     @Override
     public boolean supports(String url) {
-        return url.contains("trendyol.com");
+        return url != null && url.contains("trendyol.com");
     }
 
     @Override
     public List<Comment> commentScrap(String productUrl) {
         long contentId = extractContentId(productUrl);
-        RestClient restClient = RestClient.create();
         List<Comment> comments = new ArrayList<>();
 
-        int page = 0;
-        int totalPages = 1;
-     
-        do {
-            String url =
-                    "https://apigw.trendyol.com/discovery-storefront-trproductgw-service/api/review-read/product-reviews/detailed"
-                            + "?contentId=" + contentId
-                            + "&page=" + page
-                            + "&pageSize=10"
-                            + "&channelId=1";
-            JsonNode root = restClient.get()
-                    .uri(url)
-                    .retrieve()
-                    .body(JsonNode.class);
-            JsonNode result = require(root, "result");
-            if (page == 0) {
-                JsonNode summary = require(result, "summary");
-                JsonNode totalPagesNode = summary.get("totalPages");
-                totalPages = totalPagesNode.asInt();
+        try {
+            org.jsoup.Connection.Response initialResponse = Jsoup.connect(productUrl)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
+                    .execute();
+
+            Map<String, String> cookies = initialResponse.cookies();
+
+            int page = 0;
+            int pageSize = 50;
+
+            while (true) {
+                List<Comment> pageComments = fetchCommentsPage(contentId, productUrl, cookies, page, pageSize);
+
+                if (pageComments.isEmpty()) {
+                    break;
+                }
+
+                comments.addAll(pageComments);
+                page++;
+
+                if (page >= MAX_COMMENT_PAGES) {
+                    break;
+                }
             }
-            JsonNode reviews = require(result, "reviews");
-            if (reviews.isEmpty()) {
-                break;
-            }
+
+        } catch (Exception e) {
+            log.error("Trendyol yorumları çekilirken hata oluştu. URL: {}", productUrl, e);
+        }
+
+        return comments;
+    }
+
+    private List<Comment> fetchCommentsPage(
+            long contentId,
+            String productUrl,
+            Map<String, String> cookies,
+            int page,
+            int pageSize
+    ) throws IOException {
+
+        List<Comment> comments = new ArrayList<>();
+
+        String url = String.format(
+                "https://apigw.trendyol.com/discovery-storefront-trproductgw-service/api/review-read/product-reviews/detailed" +
+                        "?contentId=%d&page=%d&pageSize=%d&channelId=1",
+                contentId,
+                page,
+                pageSize
+        );
+
+        String jsonResponseStr = Jsoup.connect(url)
+                .cookies(cookies)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
+                .header("Accept-Language", "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7")
+                .header("Accept", "application/json, text/plain, */*")
+                .header("Referer", productUrl)
+                .header("Origin", "https://www.trendyol.com")
+                .ignoreContentType(true)
+                .execute()
+                .body();
+
+        JsonNode root = objectMapper.readTree(jsonResponseStr);
+        JsonNode result = require(root, "result");
+        JsonNode reviews = require(result, "reviews");
+
+        if (reviews.isArray()) {
             for (JsonNode review : reviews) {
-                comments.add(new Comment(
-                        require(review, "rate").asInt(),
-                        require(review, "comment").asText(),
-                        require(review, "likesCount").asInt()
-                ));
+                // Sadece yıldız verip metin yazmayan yorumlar için güvenli okuma (NPE engeller)
+                String text = review.path("comment").asText("").trim();
+                if (text.isEmpty()) {
+                    continue; // Yapay zekaya boş yorum göndermemek için pas geç
+                }
+
+                int rate = review.path("rate").asInt(0);
+                int likesCount = review.path("likesCount").asInt(0);
+
+                comments.add(new Comment(rate, text, likesCount));
             }
-            page++;
-        } while (page < totalPages);
+        }
 
         return comments;
     }
@@ -132,24 +227,22 @@ public class TrendyolScrapper implements Scrapper {
             int index = path.lastIndexOf("-p-");
 
             if (index == -1) {
-                throw new InvalidProductUrlException("");
+                throw new InvalidProductUrlException("Product ID URL içerisinde bulunamadı: " + productUrl);
             }
 
             String contentId = path.substring(index + 3);
-
             return Long.parseLong(contentId);
 
         } catch (IllegalArgumentException e) {
-            throw new InvalidProductUrlException("");
+            throw new InvalidProductUrlException("Geçersiz ürün URL formatı: " + productUrl);
         }
     }
+
     @Override
     public JsonNode require(JsonNode node, String field) {
         JsonNode value = node.get(field);
         if (value == null || value.isNull()) {
-            throw new ProductParsingException(
-                    "Trendyol response alanı parse edilemedi: " + field
-            );
+            throw new ProductParsingException("Trendyol response alanı parse edilemedi: " + field);
         }
         return value;
     }

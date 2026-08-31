@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 public class ScrapingConnectionException extends BaseException {
     public ScrapingConnectionException(String errorMessage) {
         super(errorMessage, HttpStatus.SERVICE_UNAVAILABLE);
+    }
 
+    public ScrapingConnectionException(String errorMessage, Throwable cause) {
+        super(errorMessage, HttpStatus.SERVICE_UNAVAILABLE,cause);
     }
 }

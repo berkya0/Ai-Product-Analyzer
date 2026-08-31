@@ -81,7 +81,7 @@ function AiPreferenceCard({analysis}) {
           {/* İçteki Beyaz Daire (Grafiğin Ortasını Delip Halka Yapar) */}
           <div className="w-full h-full bg-white rounded-full flex items-center justify-center gap-1 shadow-sm">
             <FaStar className="text-amber-400 text-lg" />
-            <span className="font-bold text-xl text-slate-900">{analysis.aiScore}</span>
+            <span className="font-bold text-xl text-slate-900">{analysis.aiScore*20}</span>
           </div>
         </div>
 

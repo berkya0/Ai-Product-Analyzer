@@ -1,7 +1,7 @@
 import PageHeader from "../components/PageHeader";
 import StateCards from "../components/StateCards";
 import { useEffect, useState } from "react";
-// DİKKAT: setProductFollowing'i buradan sildik çünkü Hook hallediyor
+import { useNavigate } from "react-router-dom";
 import { fetchStates, fetchProducts, reAnalyzeProduct } from "../services/dashboardService"; 
 import DashboardProducts from "../components/DashboardProductCard";
 
@@ -11,6 +11,7 @@ import { deleteProduct } from "../services/productService";
 import { useToggleFollow } from "../hooks/useToggleFollow"; // HOOK'U IMPORT ETTİK
 
 function Dashboard() {
+    const navigate = useNavigate();
     const [dashboardStats, setDashboardStats] = useState(null);
     const [dashboardProducts, setDashboardProducts] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
@@ -19,6 +20,10 @@ function Dashboard() {
 
     // HOOK'U ÇAĞIRIYORUZ
     const { toggle } = useToggleFollow();
+    const handleProductClick = (id) => {
+        // Anasayfaya gidiyoruz ve arkadan gizlice productId'yi yolluyoruz
+        navigate('/', { state: { productId: id } }); 
+    };
 
     useEffect(() => {
         async function loadDashboard() {
@@ -121,12 +126,20 @@ function Dashboard() {
 
             <Searchbar className="mt-15" />
             
+            {/* İŞTE DEĞİŞİKLİK YAPTIĞIMIZ YER BURASI */}
             <div 
                 onScroll={handleScroll}
                 className="flex flex-col gap-2 mt-4 max-h-[550px] overflow-y-auto pr-2 custom-scrollbar"
             >
                 {dashboardProducts?.content?.map((product, index) => (
-                    <DashboardProducts key={`${product.id}-${index}`} item={product} onDelete={handleDelete} onRefresh={handleReAnalyze} onToggleMute={handleToggleMute}/>
+                    <DashboardProducts 
+                        key={`${product.id}-${index}`} 
+                        item={product} 
+                        onDelete={handleDelete} 
+                        onRefresh={handleReAnalyze} 
+                        onToggleMute={handleToggleMute}
+                        onProductClick={handleProductClick} // Yeni eklediğimiz yönlendirme prop'u
+                    />
                 ))}
 
                 {loading && (

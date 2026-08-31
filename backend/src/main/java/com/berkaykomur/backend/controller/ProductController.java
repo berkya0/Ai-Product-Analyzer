@@ -15,19 +15,8 @@ import java.util.List;
 @RequestMapping("/product")
 @RequiredArgsConstructor
 public class ProductController {
-
-    private final ScrapperService scrapperService;
     private final ProductService productService;
-//    @PostMapping("scrap")
-//    public ResponseEntity<ProductResponse> scrap(@RequestParam String productUrl) {
-//        return ResponseEntity.ok(scrapperService.executeScrapping(productUrl));
-//    } //çalışmıyor şuanlık silinebilir
 
-    @GetMapping("get/{id}")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-       // return ResponseEntity.ok(productDetailService.getProductDetailById(id));
-        return null; //ihtiyac kalktı belki komple kaldırılır
-    }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProductDetailById(id);

@@ -3,7 +3,7 @@ import { FiBell, FiBellOff } from "react-icons/fi";
 import { FaStar, FaStarHalfAlt } from "react-icons/fa";
 
 function ProductResultCard({ product,aiSummary,onToggleFollow}) {
-  // Dışarıdan prop gelmezse görseldeki verileri varsayılan olarak kullanır
+  
   const data = product || {
     name: "Samsung Galaxy A54 128GB 8GB Ram",
     price: "17.999 TL",
@@ -12,7 +12,7 @@ function ProductResultCard({ product,aiSummary,onToggleFollow}) {
     summary:
       "Ürün kullanıcılar tarafından genel olarak fiyat/performans dengesi, şık tasarımı ve 120Hz Super AMOLED ekranının canlılığıyla oldukça beğenilmiş. Ana kamerasının gündüz çekim performansı ve batarya ömrü olumlu değerlendirilmiştir.",
     imageUrl:
-      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=600&auto=format&fit=crop", // Örnek telefon görseli
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=600&auto=format&fit=crop", 
   };
 
   return (
@@ -57,8 +57,7 @@ function ProductResultCard({ product,aiSummary,onToggleFollow}) {
             </button>
           </div>
 
-          {/* Yıldız Puanı ve Değerlendirme Sayısı */}
-          {/* Yıldız Puanı ve Değerlendirme Sayısı */}
+         
 <div className="flex items-center gap-1.5 mt-2">
   <div className="flex text-amber-400 gap-0.5 text-sm">
     {[1, 2, 3, 4, 5].map((star) => {
@@ -84,7 +83,7 @@ function ProductResultCard({ product,aiSummary,onToggleFollow}) {
   </span>
 
   <span className="text-[11px] text-slate-400 ml-1">
-    {data.reviewCount} Değerlendirme
+    {data.reviewCount} Yorum
   </span>
 </div>
 

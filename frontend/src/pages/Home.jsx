@@ -3,17 +3,54 @@ import Searchbar from '../components/Searchbar';
 import ProductResultCard from '../components/ProductResultCard';
 import AiPreferenceCard from '../components/AiPreferenceCard'; 
 import MostLikedFeatures from '../components/MostLikedFeatures';
-import { scrapProduct } from "../services/productService";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToggleFollow } from "../hooks/useToggleFollow"; 
+import { useLocation } from 'react-router-dom';
+
+// DÜZELTME 1: Fazladan importlar silindi, hepsi tek bir satırda birleştirildi
+import { scrapProduct, getLatestAnalyzedProduct, getAnalyzedProductById } from "../services/productService";
 
 function Home() {
+  const location = useLocation();
+  const passedProductId = location.state?.productId;
+
   const [productUrl, setProductUrl] = useState("");
   const [product, setProduct] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(false); 
   
   const { toggle } = useToggleFollow();
+
+  // DÜZELTME 2: Çakışan diğer useEffect tamamen silindi. 
+  // Sadece bu akıllı useEffect kaldı. Bu her iki durumu da zaten kusursuz yönetiyor.
+  useEffect(() => {
+    async function loadInitialProduct() {
+      try {
+        setIsLoading(true); 
+        let data;
+
+        // EĞER DASHBOARD'DAN ID GELDİYSE ÖZEL ÜRÜNÜ ÇEK
+        if (passedProductId) {
+            data = await getAnalyzedProductById(passedProductId);
+        } 
+        // GELMEDİYSE (Sayfaya normal girildiyse) EN SON ÜRÜNÜ ÇEK
+        else {
+            data = await getLatestAnalyzedProduct();
+        }
+        
+        if (data && data.product && data.analysis) {
+          setProduct(data.product);
+          setAnalysis(data.analysis);
+        }
+      } catch (error) {
+        console.error("Ürün yüklenirken hata oluştu:", error);
+      } finally {
+        setIsLoading(false); 
+      }
+    }
+
+    loadInitialProduct();
+  }, [passedProductId]);
 
   const handleScrap = async () => {
     if (!productUrl) return; 
@@ -36,7 +73,6 @@ function Home() {
 
   const handleToggleFollow = (id, currentIsFollowing) => {
     toggle(id, currentIsFollowing, (newFollowingStatus) => {
-        
         setProduct(prev => ({ ...prev, isFollowing: newFollowingStatus }));
     });
   };
@@ -64,7 +100,7 @@ function Home() {
     
       {isLoading && (
         <div className="mt-10 text-center font-semibold text-slate-600 text-lg">
-          Ürün inceleniyor ve yapay zeka yorumları analiz ediyor, lütfen bekleyin...
+          Ürün verileri yükleniyor, lütfen bekleyin...
         </div>
       )}
 
@@ -72,7 +108,6 @@ function Home() {
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
             <div>
-              {/* handleToggleMute FONKSİYONUNU KARTA PROP OLARAK GÖNDERİYORUZ */}
               <ProductResultCard 
                 product={product} 
                 aiSummary={analysis.summary} 

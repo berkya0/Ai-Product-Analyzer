@@ -15,6 +15,7 @@ public record ProductResponse(
         BigDecimal price,
         Integer reviewCount,
         Integer ratingCount,
-        boolean isFollowing
+        boolean isFollowing,
+        String category
 
 ) {}

@@ -14,6 +14,8 @@ public interface AnalysisRepository extends JpaRepository<Analysis,Long> {
     long countByProduct_IsFollowing(boolean isFollowing);
     Optional<Analysis> getAnalysisByProduct_Id(Long productId);
     List<Analysis> findAllByProduct_IdIn(List<Long> productIds);
+    Optional<Analysis> findFirstByOrderByCreatedAtDesc();
+
 
 
 

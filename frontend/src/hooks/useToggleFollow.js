@@ -5,16 +5,14 @@ export function useToggleFollow() {
    
     const [isToggling, setIsToggling] = useState(false);
 
-    // onSuccess parametresi, işlem başarılı olursa state'i güncellemek için kullanılır
+   
     const toggle = async (productId, currentIsFollowing, onSuccess) => {
         try {
             setIsToggling(true);
             const nextStatus = !currentIsFollowing;
             
-            // Backend'e isteği atıyoruz
             await setProductFollowing(productId, nextStatus);
             
-            // İstek başarılı olduysa, sayfanın kendi state'ini güncellemesine izin veriyoruz
             if (onSuccess) {
                 onSuccess(nextStatus);
             }

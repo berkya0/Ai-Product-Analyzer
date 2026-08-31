@@ -13,7 +13,8 @@ public record ScrapperResult(
         Double rating,
         BigDecimal price,
         Integer reviewCount,
-        Integer ratingCount
+        Integer ratingCount,
+        String category
 
 ) {
 }
