@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -107,7 +109,7 @@ public class TrendyolScrapper implements Scrapper {
             JsonNode itemList = webPageNode.path("breadcrumb").path("itemListElement");
             if (itemList.isArray() && !itemList.isEmpty()) {
                 // En spesifik (en alt) kategoriyi al
-                JsonNode targetNode = itemList.get(itemList.size() - 1);
+                JsonNode targetNode = itemList.get(3);
                 String categoryName = targetNode.path("item").path("name").asText("");
                 if (!categoryName.isEmpty()) {
                     categoryPath = categoryName;
@@ -166,7 +168,7 @@ public class TrendyolScrapper implements Scrapper {
             log.error("Trendyol yorumları çekilirken hata oluştu. URL: {}", productUrl, e);
         }
 
-        return comments;
+        return formatComments(comments);
     }
 
     private List<Comment> fetchCommentsPage(
@@ -175,8 +177,7 @@ public class TrendyolScrapper implements Scrapper {
             Map<String, String> cookies,
             int page,
             int pageSize
-    ) throws IOException {
-
+    ) {
         List<Comment> comments = new ArrayList<>();
 
         String url = String.format(
@@ -187,37 +188,60 @@ public class TrendyolScrapper implements Scrapper {
                 pageSize
         );
 
-        String jsonResponseStr = Jsoup.connect(url)
-                .cookies(cookies)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
-                .header("Accept-Language", "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7")
-                .header("Accept", "application/json, text/plain, */*")
-                .header("Referer", productUrl)
-                .header("Origin", "https://www.trendyol.com")
-                .ignoreContentType(true)
-                .execute()
-                .body();
+        String jsonResponseStr;
 
-        JsonNode root = objectMapper.readTree(jsonResponseStr);
-        JsonNode result = require(root, "result");
-        JsonNode reviews = require(result, "reviews");
+        try {
+            jsonResponseStr = Jsoup.connect(url)
+                    .cookies(cookies)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
+                    .header("Accept-Language", "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7")
+                    .header("Accept", "application/json, text/plain, */*")
+                    .header("Referer", productUrl)
+                    .header("Origin", "https://www.trendyol.com")
+                    .ignoreContentType(true)
+                    .timeout(10_000) // Zaman aşımı eklendi
+                    .execute()
+                    .body();
+        } catch (IOException e) {
+            log.error("Yorum API'sine bağlanırken hata oluştu. Sayfa: {}, ContentId: {}", page, contentId, e);
+            throw new ScrapingConnectionException("Yorum API'sine bağlanılamadı. Sayfa: " + page, e);
+        }
 
-        if (reviews.isArray()) {
-            for (JsonNode review : reviews) {
-                // Sadece yıldız verip metin yazmayan yorumlar için güvenli okuma (NPE engeller)
-                String text = review.path("comment").asText("").trim();
-                if (text.isEmpty()) {
-                    continue; // Yapay zekaya boş yorum göndermemek için pas geç
+        try {
+            JsonNode root = objectMapper.readTree(jsonResponseStr);
+            JsonNode result = require(root, "result");
+            JsonNode reviews = require(result, "reviews");
+
+            if (reviews.isArray()) {
+                for (JsonNode review : reviews) {
+                    String text = review.path("comment").asText("").trim();
+                    if (text.isEmpty()) {
+                        continue;
+                    }
+
+                    int rate = review.path("rate").asInt(0);
+                    int likesCount = review.path("likesCount").asInt(0);
+
+                    comments.add(new Comment(rate, text, likesCount));
                 }
-
-                int rate = review.path("rate").asInt(0);
-                int likesCount = review.path("likesCount").asInt(0);
-
-                comments.add(new Comment(rate, text, likesCount));
             }
+        } catch (ProductParsingException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Yorum JSON yanıtı parse edilemedi. Sayfa: {}, ContentId: {}", page, contentId, e);
+            throw new ProductParsingException("Yorum verisi parse edilemedi. Sayfa: " + page, e);
         }
 
         return comments;
+    }
+    private List<Comment> formatComments(List<Comment> comments) {
+        return comments.stream()
+                // 1. Çok kısa / anlamsız yorumları ele (en az 15 karakter)
+                .filter(c -> c.text() != null && c.text().trim().length() > 15)
+                // 2. En çok beğeni alan ilk 70 yorumu seç (Temsil gücü en yüksek olanlar)
+                .sorted(Comparator.comparingInt(Comment::likesCount).reversed())
+                .limit(70)
+                .toList(); // Java 16+ için. Eski sürümler için: .collect(Collectors.toList())
     }
 
     @Override

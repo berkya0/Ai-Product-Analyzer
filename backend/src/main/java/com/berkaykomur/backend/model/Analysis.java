@@ -45,21 +45,21 @@ public class Analysis extends BaseEntity {
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     private List<FeatureSentiment> featureSentiments = new ArrayList<>();
 
-    public void addHighlight(AnalysisHighlight highlight) {
-        highlights.add(highlight);
-        highlight.setAnalysis(this);
-    }
-    public void removeHighlight(AnalysisHighlight highlight) {
-        highlights.remove(highlight);
-        highlight.setAnalysis(null);
-    }
-    public void addFeatureSentiment(FeatureSentiment featureSentiment) {
-        featureSentiments.add(featureSentiment);
-        featureSentiment.setAnalysis(this);
-    }
-    public void removeFeatureSentiment(FeatureSentiment featureSentiment) {
-        featureSentiments.remove(featureSentiment);
-        featureSentiment.setAnalysis(null);
-    }
+//    public void addHighlight(AnalysisHighlight highlight) {
+//        highlights.add(highlight);
+//        highlight.setAnalysis(this);
+//    }
+//    public void removeHighlight(AnalysisHighlight highlight) {
+//        highlights.remove(highlight);
+//        highlight.setAnalysis(null);
+//    }
+//    public void addFeatureSentiment(FeatureSentiment featureSentiment) {
+//        featureSentiments.add(featureSentiment);
+//        featureSentiment.setAnalysis(this);
+//    }
+//    public void removeFeatureSentiment(FeatureSentiment featureSentiment) {
+//        featureSentiments.remove(featureSentiment);
+//        featureSentiment.setAnalysis(null);
+//    }
 
 }

@@ -2,9 +2,7 @@ package com.berkaykomur.backend.controller;
 
 import com.berkaykomur.backend.dto.CompareRequest;
 import com.berkaykomur.backend.dto.CompareResults;
-import com.berkaykomur.backend.dto.ProductResponse;
 import com.berkaykomur.backend.service.ProductService;
-import com.berkaykomur.backend.service.ScrapperService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

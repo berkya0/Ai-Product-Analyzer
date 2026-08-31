@@ -5,6 +5,7 @@ import com.berkaykomur.backend.dto.ScrapperResult;
 import com.berkaykomur.backend.exception.UnspportedMarketPlaceException;
 import com.berkaykomur.backend.mapper.ProductMapper;
 import com.berkaykomur.backend.model.Product;
+import com.berkaykomur.backend.model.Status;
 import com.berkaykomur.backend.repository.ProductRepository;
 import com.berkaykomur.backend.scrapper.Scrapper;
 import com.berkaykomur.backend.service.ScrapperService;
@@ -31,7 +32,7 @@ public class ScrapperServiceImpl implements ScrapperService {
 
         Optional<Product> product = productRepository.findProductIncludingDeleted(productUrl);
 
-        if (product.isPresent() && !forceRefresh) {
+        if (product.isPresent() && !forceRefresh && product.get().getAnalyses().getStatus()== Status.SUCCESS) {
             log.info("Ürün veritabanında bulundu ve forceRefresh=false. Ürün aktifleştiriliyor/döndürülüyor. Product ID: {}", product.get().getId());
             Product existingProduct = product.get();
             productRepository.restoreProduct(existingProduct.getId());
@@ -44,8 +45,9 @@ public class ScrapperServiceImpl implements ScrapperService {
         ScrapperResult scrapperResponse = scrapper.scrap(productUrl);
         Product savedProduct;
 
-        if (product.isPresent()) {
-            log.info("Mevcut ürün güncelleniyor. Product ID: {}", product.get().getId());
+        //analizli ürün tekrar analiz edilmek istenirse
+        if (product.isPresent()&& product.get().getAnalyses().getStatus()== Status.SUCCESS) {
+            log.info("Seçilen ürün bilgileri güncelleniyor. Product ID: {}", product.get().getId());
             Product existingProduct = product.get();
             productMapper.updateProductFromDto(scrapperResponse, existingProduct);
             savedProduct = productRepository.save(existingProduct);
@@ -54,7 +56,7 @@ public class ScrapperServiceImpl implements ScrapperService {
             savedProduct = productRepository.save(productMapper.toProduct(scrapperResponse));
         }
 
-        log.info("Ürün kazıma ve kaydetme işlemi başarıyla tamamlandı. Product ID: {}", savedProduct.getId());
+        log.info("Ürün kazıma işlemi başarıyla tamamlandı. Product ID: {}", savedProduct.getId());
         return productMapper.toProductResponse(savedProduct);
     }
 

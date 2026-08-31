@@ -2,6 +2,7 @@ package com.berkaykomur.backend.service.impl;
 
 import com.berkaykomur.backend.ai.AiAnalysis;
 import com.berkaykomur.backend.dto.AnalysisResult;
+import com.berkaykomur.backend.exception.AiAnalaysisNotFoundException;
 import com.berkaykomur.backend.exception.ProductNotFoundException;
 import com.berkaykomur.backend.mapper.AnalysisMapper;
 import com.berkaykomur.backend.model.Analysis;
@@ -36,37 +37,34 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
                 .orElseThrow(() -> new ProductNotFoundException("Id'ye göre ürün bulunamadı: " + productId));
 
         Optional<Analysis> existingAnalysisOp = analysisRepository.getAnalysisByProduct_Id(productId);
-        if(existingAnalysisOp.isPresent()&&!forceRefresh){
-            log.info("Veritabanında mevcut analiz bulundu. Yeniden AI isteği atılmayacak. Product ID: {}", productId);
-            return analysisMapper.toAnalysisResult(existingAnalysisOp.get());
+        if(existingAnalysisOp.isPresent() && !forceRefresh) {
+            Analysis existingAnalysis = existingAnalysisOp.get();
+            if (existingAnalysis.getStatus() == Status.SUCCESS) {
+                log.info("Veritabanında mevcut analiz bulundu. Yeniden AI isteği atılmayacak. Product ID: {}", productId);
+                return analysisMapper.toAnalysisResult(existingAnalysis);
+            }
+            log.info("Mevcut analiz PENDING durumunda, analiz baştan işlenecek. Product ID: {}", productId);
         }
 
         String productUrl=product.getProductUrl();
         log.debug("Yapay zeka analizi için istek atılıyor. URL: {}", productUrl);
         AnalysisResult analysisResult=aiAnalysis.analyzeComments(scrapper,productUrl);
         if(analysisResult==null ){
-            log.warn("Yapay zeka analizi başarısız oldu (Sonuç null döndü). Ürün FAILED durumuna çekiliyor. Product ID: {}", productId);
-            Analysis failedAnalysis=Analysis.builder()
-                    .product(product)
-                    .status(Status.FAILED)
-                    .build();
-            analysisRepository.save(failedAnalysis);
-            return analysisMapper.toAnalysisResult(failedAnalysis);
+            throw new AiAnalaysisNotFoundException("Analiz sonuçları null döndü. Analiz yapılamadı: "+productUrl);
+
         }
 
-        Analysis analysisEntity;
-        if (existingAnalysisOp.isPresent()) {
-            log.info("Daha önceden analiz edilen ürün tekrar analiz ediliyor. Product ID: {}", productId);
-            analysisEntity = existingAnalysisOp.get();
-            analysisMapper.updateAnalysisFromDto(analysisResult, analysisEntity);
-        } else {
-            analysisEntity = analysisMapper.toAnalysis(analysisResult);
+        if (existingAnalysisOp.isEmpty()) {
+           throw new AiAnalaysisNotFoundException("Analiz akışında hata PENDING analiz yok");
         }
-
-        analysisEntity.setProduct(product);
+        Analysis analysisEntity=existingAnalysisOp.get();
+        log.info("Ürün analizi oluşşturuluyor. Product ID: {}", productId);
+        analysisMapper.updateAnalysisFromDto(analysisResult, analysisEntity);
         analysisEntity.setStatus(Status.SUCCESS);
+        analysisEntity.setProduct(product);
         log.info("Yapay zeka analizi başarılı oldu");
         analysisRepository.save(analysisEntity);
+
         return analysisMapper.toAnalysisResult(analysisEntity);
 
     }

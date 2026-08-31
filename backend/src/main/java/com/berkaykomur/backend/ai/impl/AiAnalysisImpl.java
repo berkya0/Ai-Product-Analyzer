@@ -24,6 +24,7 @@ public class AiAnalysisImpl implements AiAnalysis {
         try {
             List<Comment> comments = scrapper.commentScrap(productUrl);
             if (comments.isEmpty()) {
+                log.warn("Analiz edilecek yorum bulunamadı,AI analizi yapılmayacak: {}",productUrl);
                 return null;
             }
             return analyze(comments);
@@ -136,27 +137,24 @@ public class AiAnalysisImpl implements AiAnalysis {
                 - Base the entire analysis ONLY on the provided reviews.
                 - Do not use external knowledge.
                 - Do not hallucinate or assume product specifications.
-- Do not assume that a customer's claim is objectively true; report it as a customer experience or opinion.
-- Star ratings are signals, but the written content is more important for understanding the reason behind the rating.
-- Consider likesCount as a supporting signal only. A high likesCount does not prove that a claim is objectively correct.
-- Focus on recurring opinions and meaningful experiences rather than isolated generic comments.
-- Do not let multiple nearly identical short comments dominate the analysis simply because they are repeated.
-- Distinguish between:
-  1. product performance/quality
-  2. seller/service issues
-  3. shipping/delivery issues
-  4. packaging issues
-- If the reviews contain conflicting opinions, explicitly reflect the disagreement instead of choosing one side without evidence.
-- Do not make claims beyond what the reviews support.
-- Keep the analysis concise and useful for a product comparison dashboard.
-- Return the result in the exact structure expected by the application.
-
-Reviews:
-%s
-""".formatted(formatComments(comments));
-
-
-
+                - Do not assume that a customer's claim is objectively true; report it as a customer experience or opinion.
+                - Star ratings are signals, but the written content is more important for understanding the reason behind the rating.
+                - Consider likesCount as a supporting signal only. A high likesCount does not prove that a claim is objectively correct.
+                - Focus on recurring opinions and meaningful experiences rather than isolated generic comments.
+                - Do not let multiple nearly identical short comments dominate the analysis simply because they are repeated.
+                - Distinguish between:
+                  1. product performance/quality
+                  2. seller/service issues
+                  3. shipping/delivery issues
+                  4. packaging issues
+                - If the reviews contain conflicting opinions, explicitly reflect the disagreement instead of choosing one side without evidence.
+                - Do not make claims beyond what the reviews support.
+                - Keep the analysis concise and useful for a product comparison dashboard.
+                - Return the result in the exact structure expected by the application.
+                
+                Reviews:
+                %s
+                """.formatted(formatComments(comments));
         try {
             return chatClient
                     .prompt()
@@ -164,8 +162,7 @@ Reviews:
                     .call()
                     .entity(AnalysisResult.class);
         } catch (Exception e) {
-            log.error("AI analizi sonucunda hata oluştu: {}", e);
-
+            log.error("AI analizi sonucunda hata oluştu", e);
             return null;
         }
     }

@@ -1,6 +1,7 @@
 package com.berkaykomur.backend.service.impl;
 
 import com.berkaykomur.backend.dto.CompareResults;
+import com.berkaykomur.backend.exception.CategoryMismatchException;
 import com.berkaykomur.backend.exception.ProductNotFoundException;
 import com.berkaykomur.backend.mapper.AnalysisMapper;
 import com.berkaykomur.backend.model.Analysis;
@@ -82,10 +83,15 @@ public class ProductServiceImpl implements ProductService {
         }
 
         List<Analysis> analyses = analysisRepository.findAllByProduct_IdIn(productIds);
+        if (!analyses.getFirst().getProduct().getCategory().equals(analyses.getLast().getProduct().getCategory())) {
+            String message = String.format("Farklı kategorideki ürünler karşılaştırılamaz! Ürün 1: %s, Ürün 2: %s",
+                    analyses.getFirst().getProduct().getCategory(),
+                    analyses.getLast().getProduct().getCategory());
+            throw new CategoryMismatchException(message);
+        }
         return analyses.stream()
                 .map(analysisMapper::toCompareResults)
                 .toList();
     }
-
 
 }

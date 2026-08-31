@@ -19,6 +19,7 @@ public interface AnalysisMapper {
     @Mapping(target = "id",ignore = true)
     @Mapping(target = "product",ignore = true)
     @Mapping(source = "featureResults", target ="featureSentiments")
+    @Mapping(target = "status",ignore = true)
     Analysis toAnalysis(AnalysisResult analysisResult);
 
     @AfterMapping
@@ -35,6 +36,7 @@ public interface AnalysisMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "product", ignore = true)
+    @Mapping(source = "featureResults", target = "featureSentiments")
     void updateAnalysisFromDto(AnalysisResult result, @MappingTarget Analysis analysis);
 
     @Mapping(source = "featureSentiments", target = "featureResults")

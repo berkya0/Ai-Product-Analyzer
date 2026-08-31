@@ -8,7 +8,7 @@ import { useToggleFollow } from "../hooks/useToggleFollow";
 import { useLocation } from 'react-router-dom';
 
 // DÜZELTME 1: Fazladan importlar silindi, hepsi tek bir satırda birleştirildi
-import { scrapProduct, getLatestAnalyzedProduct, getAnalyzedProductById } from "../services/productService";
+import { pollProductAnalysis, getLatestAnalyzedProduct, getAnalyzedProductById } from "../services/productService";
 
 function Home() {
   const location = useLocation();
@@ -52,25 +52,49 @@ function Home() {
     loadInitialProduct();
   }, [passedProductId]);
 
+  // const handleScrap = async () => {
+  //   if (!productUrl) return; 
+
+  //   try {
+  //     setIsLoading(true); 
+      
+  //     const data = await scrapProduct(productUrl);
+      
+  //     setProduct(data.product);
+  //     setAnalysis(data.analysis);
+
+  //   } catch (error) {
+  //     console.error("Analiz sırasında hata oluştu:", error);
+  //     alert("Ürün analiz edilemedi. Lütfen linki kontrol edin.");
+  //   } finally {
+  //     setIsLoading(false); 
+  //   }
+  // };
+
+  const [loadingMessage, setLoadingMessage] = useState("Ürün verileri yükleniyor, lütfen bekleyin...");
+
   const handleScrap = async () => {
     if (!productUrl) return; 
 
     try {
       setIsLoading(true); 
+      setLoadingMessage("Analiz sıraya alındı, veriler kazınıyor...");
       
-      const data = await scrapProduct(productUrl);
+      // pollProductAnalysis fonksiyonu işlem bitene kadar arkada her 3 saniyede bir /status atar
+      const data = await pollProductAnalysis(productUrl, (status, message) => {
+          setLoadingMessage(message); // Her sorgudaki ara mesajı arayüze yansıtabilirsin
+      });
       
       setProduct(data.product);
       setAnalysis(data.analysis);
 
     } catch (error) {
       console.error("Analiz sırasında hata oluştu:", error);
-      alert("Ürün analiz edilemedi. Lütfen linki kontrol edin.");
+      alert(error.message || "Ürün analiz edilemedi. Lütfen linki kontrol edin.");
     } finally {
       setIsLoading(false); 
     }
   };
-
   const handleToggleFollow = (id, currentIsFollowing) => {
     toggle(id, currentIsFollowing, (newFollowingStatus) => {
         setProduct(prev => ({ ...prev, isFollowing: newFollowingStatus }));
