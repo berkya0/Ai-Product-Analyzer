@@ -6,6 +6,7 @@ import MostLikedFeatures from '../components/MostLikedFeatures';
 import { useState, useEffect } from "react";
 import { useToggleFollow } from "../hooks/useToggleFollow"; 
 import { useLocation } from 'react-router-dom';
+import WordPressPublisherCard from '../components/WordPressPublisherCard';
 
 // DÜZELTME 1: Fazladan importlar silindi, hepsi tek bir satırda birleştirildi
 import { pollProductAnalysis, getLatestAnalyzedProduct, getAnalyzedProductById } from "../services/productService";
@@ -152,6 +153,8 @@ function Home() {
               <MostLikedFeatures analysis={analysis} type="COMPLAINED"/>
             </div>
           </div>
+          {/* 🌟 YENİ EKLENEN WORDPRESS ÖNİZLEME VE YAYINLAMA PANELI */}
+          <WordPressPublisherCard product={product} analysis={analysis} />
         </>
       )}
     </main>

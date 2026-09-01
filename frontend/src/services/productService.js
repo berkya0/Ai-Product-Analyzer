@@ -53,6 +53,60 @@ export async function checkAnalysisStatus(productId) {
     
     return data; 
 }
+// --- WORDPRESS ENTEGRASYON SERVİSLERİ ---
+
+// Aktif siteleri getir (Dropdown için)
+export async function getActiveSites() {
+    const response = await fetch("http://localhost:8080/api/sites");
+    if (!response.ok) {
+        throw new Error("Siteler yüklenemedi.");
+    }
+    return await response.json();
+}
+
+// Yayınlamadan önce HTML çıktısını önizlemek için
+export async function getPreviewHtml(combinedData) {
+    const response = await fetch("http://localhost:8080/api/wordpress/preview", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(combinedData),
+    });
+
+    if (!response.ok) {
+        throw new Error("Önizleme oluşturulamadı.");
+    }
+    return await response.text(); // Backend ResponseEntity<String> döndüğü için text() alıyoruz
+}
+
+// Seçilen siteye WordPress üzerinden makaleyi fırlatmak için
+export async function publishToWordPress(siteId, combinedData) {
+    const response = await fetch(`http://localhost:8080/api/wordpress/publish/${siteId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(combinedData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "WordPress'e yayınlama başarısız oldu.");
+    }
+    return data;
+}
+
+// Yeni site kaydetmek istersen (İleride bir modal yaparsan kullanabilirsin)
+export async function addSite(siteData) {
+    const response = await fetch("http://localhost:8080/api/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(siteData),
+    });
+    if (!response.ok) throw new Error("Site kaydedilemedi.");
+    return await response.text();
+}
 
 // 3. Adım: Kullanıcının butonuna basınca arka arkaya sorgu atacak (Polling) akış yöneticisi
 export async function pollProductAnalysis(productUrl, onProgress, intervalMs = 3000) {
