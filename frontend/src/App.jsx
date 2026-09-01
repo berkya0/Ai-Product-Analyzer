@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Compare from "./pages/Compare";
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/compare" element ={<Compare></Compare>}></Route>
+          <Route path="/settings" element={<Settings />} />
         </Routes>
 
         </div>

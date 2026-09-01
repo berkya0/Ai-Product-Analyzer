@@ -29,4 +29,9 @@ public class SiteController {
         List<Site> sites = siteService.getActiveSites();
         return ResponseEntity.ok(sites);
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSite(@PathVariable Long id) {
+        siteService.deleteSite(id);
+        return ResponseEntity.noContent().build();
+    }
 }

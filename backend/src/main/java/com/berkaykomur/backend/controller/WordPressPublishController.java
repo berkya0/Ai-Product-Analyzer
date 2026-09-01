@@ -4,6 +4,7 @@ import com.berkaykomur.backend.dto.ProductAnalysisCombinedResponse;
 import com.berkaykomur.backend.service.WordPressHtmlBuilderService;
 import com.berkaykomur.backend.service.WordPressPublisherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,14 +19,21 @@ public class WordPressPublishController {
     @PostMapping("/publish/{siteId}")
     public ResponseEntity<String> publishToWordPress(
             @PathVariable Long siteId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false, defaultValue = "publish") String status,
             @RequestBody ProductAnalysisCombinedResponse combinedData) {
 
-        String wpResponse = publisherService.publish(siteId, combinedData);
-        return ResponseEntity.ok(wpResponse);
+        String wpResponse = publisherService.publish(siteId, title, status,combinedData);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(wpResponse);
     }
     @PostMapping("/preview")
     public ResponseEntity<String> previewHtml(@RequestBody ProductAnalysisCombinedResponse combinedData) {
         String generatedHtml = htmlBuilderService.buildHtml(combinedData.product(), combinedData.analysis());
-        return ResponseEntity.ok(generatedHtml);
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_HTML)
+                .body(generatedHtml);
     }
 }

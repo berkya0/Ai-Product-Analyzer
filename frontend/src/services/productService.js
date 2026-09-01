@@ -81,6 +81,8 @@ export async function getPreviewHtml(combinedData) {
 }
 
 // Seçilen siteye WordPress üzerinden makaleyi fırlatmak için
+
+
 export async function publishToWordPress(siteId, combinedData) {
     const response = await fetch(`http://localhost:8080/api/wordpress/publish/${siteId}`, {
         method: "POST",
@@ -90,11 +92,36 @@ export async function publishToWordPress(siteId, combinedData) {
         body: JSON.stringify(combinedData),
     });
 
-    const data = await response.json();
+    // Yanıtı önce düz metin olarak alıyoruz
+    const responseText = await response.text();
+
+    // 1. HATA DURUMU
     if (!response.ok) {
-        throw new Error(data.message || "WordPress'e yayınlama başarısız oldu.");
+        try {
+            const errorData = JSON.parse(responseText);
+            throw new Error(errorData.message || "WordPress'e yayınlama başarısız oldu.");
+        } catch (e) {
+            throw new Error(responseText || "WordPress'e yayınlama başarısız oldu.");
+        }
     }
-    return data;
+
+    // 2. BAŞARI DURUMU (Eksik olan ve eklemen gereken yer burası!)
+    // WordPress'ten gelen JSON metnini parse edip dışarı döndürüyoruz ki ID ve Link'i görebilelim
+    try {
+        return responseText ? JSON.parse(responseText) : { success: true };
+    } catch (e) {
+        return { success: true, rawResponse: responseText };
+    }
+}
+// Kayıtlı bir WordPress sitesini silmek için
+export async function deleteSite(siteId) {
+    const response = await fetch(`http://localhost:8080/api/sites/${siteId}`, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Site silinirken hata oluştu");
+    }
+    return true;
 }
 
 // Yeni site kaydetmek istersen (İleride bir modal yaparsan kullanabilirsin)

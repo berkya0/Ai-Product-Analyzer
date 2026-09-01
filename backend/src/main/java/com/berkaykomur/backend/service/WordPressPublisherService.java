@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -25,16 +26,18 @@ public class WordPressPublisherService {
     private final WordPressHtmlBuilderService htmlBuilderService;
     private final RestClient restClient = RestClient.create();
 
-    public String publish(Long siteId, ProductAnalysisCombinedResponse combinedData) {
+    public String publish(Long siteId, String customTitle,String status,ProductAnalysisCombinedResponse combinedData) {
 
         Site site = siteRepository.findById(siteId)
                 .orElseThrow(() -> new SiteNotFoundException("Site bulunamadı! ID: " + siteId));
 
         String htmlContent = htmlBuilderService.buildHtml(combinedData.product(), combinedData.analysis());
-        String title = combinedData.product().name() + " AI Destekli Detaylı Analizi";
+        String title = (customTitle != null && !customTitle.isBlank())
+                ? customTitle
+                : combinedData.product().name() + " AI Destekli Detaylı Analizi";
+        String postStatus = (status != null && !status.isBlank()) ? status : "pending";
 
-        WordPressPostRequest payload = new WordPressPostRequest(title, htmlContent, "draft");
-
+        WordPressPostRequest payload = new WordPressPostRequest(title, htmlContent, postStatus);
 
         String credentials = site.getUsername() + ":" + site.getAppPassword();
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
@@ -45,20 +48,27 @@ public class WordPressPublisherService {
         log.info("WordPress'e içerik gönderiliyor: {}", wpEndpoint);
 
         try {
-            String response = restClient.post()
+            ResponseEntity<String> responseEntity = restClient.post()
                     .uri(wpEndpoint)
                     .header(HttpHeaders.AUTHORIZATION, authHeader)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(payload)
                     .retrieve()
-                    .body(String.class);
+                    .toEntity(String.class);
+
+            log.info("WordPress HTTP Status: {}", responseEntity.getStatusCode());
+            log.info("WordPress Response Body: {}", responseEntity.getBody());
+
+            if (responseEntity.getStatusCode().is3xxRedirection()) {
+                throw new WordPressPublishException("WordPress Yönlendirme (301/302) yaptı! Veritabanındaki site URL'sinde 'https://' veya 'www.' eksik/fazla olabilir. Gidilen adres: " + wpEndpoint);
+            }
 
             log.info("İçerik başarıyla yayınlandı!");
-            return response; // WordPress'in döndürdüğü JSON (Oluşturulan yazının ID'si vb. içerir)
+            return responseEntity.getBody();
 
         } catch (Exception e) {
             log.error("WordPress'e gönderim başarısız oldu: ", e);
-            throw new WordPressPublishException("WordPress yayınlama hatası: " + e.getMessage(),e);
+            throw new WordPressPublishException("WordPress yayınlama hatası: " + e.getMessage(), e);
         }
     }
 }

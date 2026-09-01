@@ -2,21 +2,18 @@ import logo from "../assets/logo.png"
 import { SlHome } from "react-icons/sl";
 import { RxDashboard } from "react-icons/rx";
 import { IoGitCompare } from "react-icons/io5";
+import { FiSettings } from "react-icons/fi"; // Ayarlar ikonu
 
 function Sidebar() {
-  // Mevcut sayfanın yolunu (URL'in son kısmını) alıyoruz
   const currentPath = window.location.pathname;
 
-  // Linkin aktif olup olmamasına göre class döndüren yardımcı fonksiyon
   const getLinkClasses = (path) => {
     const baseClasses = "flex items-center gap-3 rounded-lg px-4 py-3";
     
-    // Eğer bulunduğumuz sayfa linkin sayfasına eşitse, koyu arka plan (aktif) ver
     if (currentPath === path) {
       return `${baseClasses} bg-slate-800 text-white`; 
     }
     
-    // Eşit değilse üzerine gelince (hover) koyu olacak şekilde ayarla
     return `${baseClasses} text-slate-300 hover:bg-slate-800 hover:text-white transition-colors`;
   };
 
@@ -26,7 +23,7 @@ function Sidebar() {
       <img
         src={logo}
         alt="Provega"
-        className="w-54 h-15"
+        className="w-54 h-15 mb-6"
       />
 
       <nav className="mt-3 space-y-3">
@@ -43,6 +40,12 @@ function Sidebar() {
         <a href="/compare" className={getLinkClasses("/compare")}>
           <IoGitCompare className="h-5 w-5" />
           <span>Karşılaştır</span>
+        </a>
+
+        {/* Ayarlar butonu buraya taşındı */}
+        <a href="/settings" className={getLinkClasses("/settings")}>
+          <FiSettings className="h-5 w-5" />
+          <span>Ayarlar</span>
         </a>
       </nav>
 
