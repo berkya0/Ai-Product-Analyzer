@@ -1,6 +1,6 @@
 import PageHeader from "../components/PageHeader";
 import StateCards from "../components/StateCards";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchStates, fetchProducts, reAnalyzeProduct } from "../services/dashboardService"; 
 import DashboardProducts from "../components/DashboardProductCard";
@@ -8,7 +8,7 @@ import DashboardProducts from "../components/DashboardProductCard";
 import '@fontsource/montserrat';
 import Searchbar from "../components/Searchbar";
 import { deleteProduct } from "../services/productService";
-import { useToggleFollow } from "../hooks/useToggleFollow"; // HOOK'U IMPORT ETTİK
+import { useToggleFollow } from "../hooks/useToggleFollow";
 
 function Dashboard() {
     const navigate = useNavigate();
@@ -16,12 +16,13 @@ function Dashboard() {
     const [dashboardProducts, setDashboardProducts] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [loading, setLoading] = useState(false);
-    const pageSize = 6;
+    
+    const pageSize = 100; 
+    const scrollContainerRef = useRef(null); 
 
-    // HOOK'U ÇAĞIRIYORUZ
     const { toggle } = useToggleFollow();
+    
     const handleProductClick = (id) => {
-        // Anasayfaya gidiyoruz ve arkadan gizlice productId'yi yolluyoruz
         navigate('/', { state: { productId: id } }); 
     };
 
@@ -51,12 +52,36 @@ function Dashboard() {
         
     }, [currentPage]);
 
+    // container dolmadıysa (scrollbar çıkmadıysa) otomatik sonraki sayfayı çek
+    useEffect(() => {
+        if (!dashboardProducts || loading) return;
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const yuklenenUrunSayisi = dashboardProducts.content?.length || 0;
+        const toplamUrunSayisi = dashboardProducts.totalElements || 0;
+
+        if (
+            container.scrollHeight <= container.clientHeight &&
+            yuklenenUrunSayisi < toplamUrunSayisi
+        ) {
+            setCurrentPage((prev) => prev + 1);
+        }
+    }, [dashboardProducts, loading]);
+
     const handleScroll = (e) => {
-        const { scrollTop, scrollHeight, clientHeight } = e.target;
-        
-        if (scrollHeight - scrollTop <= clientHeight + 5 && !loading) {
-            if (dashboardProducts && currentPage < dashboardProducts.totalPages) {
+        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+        const kalanPiksel = scrollHeight - (scrollTop + clientHeight);
+
+        if (kalanPiksel <= 50 && !loading) {
+            const yuklenenUrunSayisi = dashboardProducts?.content?.length || 0;
+            const toplamUrunSayisi = dashboardProducts?.totalElements || 0;
+
+            if (dashboardProducts && yuklenenUrunSayisi < toplamUrunSayisi) {
+                console.log("🚀 Daha fazla ürün var, yeni sayfa isteniyor. Mevcut sayfa:", currentPage + 1);
                 setCurrentPage((prev) => prev + 1);
+            } else {
+                console.log("🛑 Tüm ürünler zaten listelendi, başka ürün yok.");
             }
         }
     };
@@ -89,10 +114,8 @@ function Dashboard() {
         }
     }
 
-    // YENİ VE TERTEMİZ HOOK KULLANIMI
     const handleToggleMute = (id, currentIsFollowing) => {
         toggle(id, currentIsFollowing, (newFollowingStatus) => {
-            // 1. Tablodaki ürünü güncelle
             setDashboardProducts(prev => ({
                 ...prev,
                 content: prev.content.map(product => 
@@ -100,7 +123,6 @@ function Dashboard() {
                 )
             }));
 
-            // 2. Renkli istatistik kartını güncelle
             setDashboardStats(prevStats => {
                 if (!prevStats) return prevStats; 
                 return {
@@ -126,8 +148,8 @@ function Dashboard() {
 
             <Searchbar className="mt-15" />
             
-            {/* İŞTE DEĞİŞİKLİK YAPTIĞIMIZ YER BURASI */}
             <div 
+                ref={scrollContainerRef}
                 onScroll={handleScroll}
                 className="flex flex-col gap-2 mt-4 max-h-[550px] overflow-y-auto pr-2 custom-scrollbar"
             >
@@ -138,7 +160,7 @@ function Dashboard() {
                         onDelete={handleDelete} 
                         onRefresh={handleReAnalyze} 
                         onToggleMute={handleToggleMute}
-                        onProductClick={handleProductClick} // Yeni eklediğimiz yönlendirme prop'u
+                        onProductClick={handleProductClick} 
                     />
                 ))}
 

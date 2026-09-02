@@ -6,7 +6,8 @@ import {
   Bell, 
   BellOff, 
   RefreshCw, 
-  Trash2 
+  Trash2,
+  Clock // PENDING durumu için eklendi
 } from 'lucide-react';
 
 function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductClick }) {
@@ -19,7 +20,7 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductC
   return (
     <div className="grid grid-cols-[1fr_100px_160px_130px_120px] items-center p-4 bg-white hover:shadow-md transition-shadow gap-7">
       
-      {/* 1. Sol Kısım: Görsel, Başlık ve Tarih - BURAYI TIKLANABİLİR YAPTIK */}
+      {/* 1. Sol Kısım: Görsel, Başlık ve Tarih */}
       <div 
         className="flex items-center space-x-4 min-w-[280px] cursor-pointer hover:opacity-75 transition-opacity"
         onClick={() => onProductClick(item?.id)}
@@ -53,12 +54,17 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductC
         </span>
       </div>
 
-      {/* 4. Başarı / Başarısızlık Durumu */}
+      {/* 4. Başarı / Bekleme / Başarısızlık Durumu */}
       <div className="flex items-center space-x-1.5 min-w-[110px]">
         {item?.status === 'SUCCESS' ? (
           <>
             <Check className="w-5 h-5 text-green-500 stroke-[3]" />
             <span className="text-sm font-semibold text-green-500">Başarılı</span>
+          </>
+        ) : item?.status === 'PENDING' ? (
+          <>
+            <Clock className="w-5 h-5 text-blue-500 stroke-[3]" />
+            <span className="text-sm font-semibold text-blue-500">Bekliyor</span>
           </>
         ) : (
           <>
@@ -80,8 +86,8 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductC
 
         <button 
            onClick={() => {
-        onRefresh(item?.id, item?.productUrl);
-    }}
+              onRefresh(item?.id, item?.productUrl);
+           }}
           className="hover:text-black transition-colors"
           title="Yenile"
         >
@@ -100,4 +106,5 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductC
     </div>
   );
 }
+
 export default DashboardProducts;

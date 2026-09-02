@@ -27,7 +27,7 @@ function Settings() {
 
   return (
     <main className="w-full h-full p-8 font-[inter] bg-slate-50 min-h-screen">
-      <div className="max-w-5xl mx-auto">
+      <div>
         
         {/* Sayfa Başlığı */}
         <div className="mb-8">

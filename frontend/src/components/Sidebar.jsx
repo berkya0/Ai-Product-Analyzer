@@ -2,7 +2,7 @@ import logo from "../assets/logo.png"
 import { SlHome } from "react-icons/sl";
 import { RxDashboard } from "react-icons/rx";
 import { IoGitCompare } from "react-icons/io5";
-import { FiSettings } from "react-icons/fi"; // Ayarlar ikonu
+import { FiSettings } from "react-icons/fi"; 
 
 function Sidebar() {
   const currentPath = window.location.pathname;

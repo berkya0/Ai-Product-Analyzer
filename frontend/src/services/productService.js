@@ -1,25 +1,4 @@
-// export async function scrapProduct(productUrl) {
-//     const response = await fetch(
-//         `http://localhost:8080/ai/analyze`,
-//         {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json", 
-//             },
-//             body: JSON.stringify({ productUrl: productUrl }) 
-//         }
-//     );
-    
-//     const data = await response.json();
 
-//     if (!response.ok) {
-//         throw new Error(data.message || "Bir hata oluştu");
-//     }
-    
-//     return data;
-// }
-
-// 1. Adım: Analizi başlatır ve arka plan ID'sini (productId) döner
 export async function startAnalysis(productUrl) {
     const response = await fetch(
         `http://localhost:8080/ai/analyze`,
@@ -105,8 +84,7 @@ export async function publishToWordPress(siteId, combinedData) {
         }
     }
 
-    // 2. BAŞARI DURUMU (Eksik olan ve eklemen gereken yer burası!)
-    // WordPress'ten gelen JSON metnini parse edip dışarı döndürüyoruz ki ID ve Link'i görebilelim
+
     try {
         return responseText ? JSON.parse(responseText) : { success: true };
     } catch (e) {
@@ -135,7 +113,7 @@ export async function addSite(siteData) {
     return await response.text();
 }
 
-// 3. Adım: Kullanıcının butonuna basınca arka arkaya sorgu atacak (Polling) akış yöneticisi
+
 export async function pollProductAnalysis(productUrl, onProgress, intervalMs = 3000) {
     // 1. Analizi tetikle ve ID al
     const initData = await startAnalysis(productUrl);

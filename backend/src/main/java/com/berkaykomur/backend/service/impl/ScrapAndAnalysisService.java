@@ -36,20 +36,6 @@ public class ScrapAndAnalysisService {
     private final ProductMapper productMapper;
     private final ProductRepository productRepository;
 
-
-//    @Async("analysisTaskExecutor")
-//    public CompletableFuture<ProductAnalysisCombinedResponse> scrapAndAnalysis(String productUrl, boolean forceRefresh) {
-//        log.info("Ürün kazıma ve analiz süreci başlatıldı. URL: {}, ForceRefresh: {}", productUrl, forceRefresh);
-//
-//        ProductResponse scrappedProduct = scrapperService.executeScrapping(productUrl, forceRefresh);
-//        Scrapper scrapper = scrapperService.getScrapper(productUrl);
-//        AnalysisResult analysisResult = aiAnalysisService.createAnalysis(scrapper, scrappedProduct.id(), forceRefresh);
-//
-//        log.info("Ürün kazıma ve analiz süreci başarıyla tamamlandı. Product ID: {}", scrappedProduct.id());
-//        ProductAnalysisCombinedResponse response=new ProductAnalysisCombinedResponse(scrappedProduct, analysisResult);
-//        return CompletableFuture.completedFuture(response);
-//
-//    }
     @Async("analysisTaskExecutor")
     public void startAsyncProcess(Long productId, String productUrl, boolean forceRefresh) {
         log.info("Ürün analizi işlenmeye başlandı. Product ID: {} forceRefresh:{}", productId,forceRefresh);

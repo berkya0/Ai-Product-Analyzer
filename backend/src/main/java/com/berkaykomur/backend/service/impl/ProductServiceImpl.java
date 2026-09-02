@@ -45,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
     @Async
     @Override
     public void updateFollowedProductPrices() {
-        log.info("Otomatik fiyat takip ve güncelleme işlemi başlatıldı.");
+        log.info("Otomatik takip ve güncelleme işlemi başlatıldı.");
 
         List<Product> followedProducts = productRepository.findAllByIsFollowingIsTrue();
         if (followedProducts.isEmpty()) {
@@ -65,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        log.info("Otomatik fiyat güncelleme işlemi tamamlandı.");
+        log.info("Otomatik güncelleme işlemi tamamlandı.");
     }
 
     @Override

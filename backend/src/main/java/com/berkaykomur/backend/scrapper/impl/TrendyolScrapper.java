@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +57,6 @@ public class TrendyolScrapper implements Scrapper {
             try {
                 JsonNode node = objectMapper.readTree(script.data());
 
-                // JSON bir dizi (array) olarak gelmişse ilk elemanı al
                 if (node.isArray() && !node.isEmpty()) {
                     node = node.get(0);
                 }
@@ -65,7 +64,7 @@ public class TrendyolScrapper implements Scrapper {
                 if (node.has("@type")) {
                     String type = node.get("@type").asText();
                     if ("ProductGroup".equalsIgnoreCase(type) || "Product".equalsIgnoreCase(type)) {
-                        // aggregateRating barındıran node'a öncelik ver (ezilmeyi engeller)
+
                         if (productNode == null || node.hasNonNull("aggregateRating")) {
                             productNode = node;
                         }
@@ -108,7 +107,7 @@ public class TrendyolScrapper implements Scrapper {
         if (webPageNode != null) {
             JsonNode itemList = webPageNode.path("breadcrumb").path("itemListElement");
             if (itemList.isArray() && !itemList.isEmpty()) {
-                // En spesifik (en alt) kategoriyi al
+
                 JsonNode targetNode = itemList.get(3);
                 String categoryName = targetNode.path("item").path("name").asText("");
                 if (!categoryName.isEmpty()) {
@@ -199,7 +198,7 @@ public class TrendyolScrapper implements Scrapper {
                     .header("Referer", productUrl)
                     .header("Origin", "https://www.trendyol.com")
                     .ignoreContentType(true)
-                    .timeout(10_000) // Zaman aşımı eklendi
+                    .timeout(10_000)
                     .execute()
                     .body();
         } catch (IOException e) {
@@ -240,8 +239,8 @@ public class TrendyolScrapper implements Scrapper {
                 .filter(c -> c.text() != null && c.text().trim().length() > 15)
                 // 2. En çok beğeni alan ilk 70 yorumu seç (Temsil gücü en yüksek olanlar)
                 .sorted(Comparator.comparingInt(Comment::likesCount).reversed())
-                .limit(70)
-                .toList(); // Java 16+ için. Eski sürümler için: .collect(Collectors.toList())
+                .limit(150)
+                .toList();
     }
 
     @Override

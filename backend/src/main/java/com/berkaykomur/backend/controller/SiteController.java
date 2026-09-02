@@ -1,7 +1,7 @@
 package com.berkaykomur.backend.controller;
 
 import com.berkaykomur.backend.dto.SiteCreateRequest;
-import com.berkaykomur.backend.model.Site;
+import com.berkaykomur.backend.dto.SiteResponse;
 import com.berkaykomur.backend.service.SiteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class SiteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Site>> getActiveSites() {
-        List<Site> sites = siteService.getActiveSites();
+    public ResponseEntity<List<SiteResponse>> getActiveSites() {
+        List<SiteResponse> sites = siteService.getActiveSites();
         return ResponseEntity.ok(sites);
     }
     @DeleteMapping("/{id}")

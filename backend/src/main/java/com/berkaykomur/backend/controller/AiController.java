@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/ai")
@@ -24,22 +23,10 @@ public class AiController {
     private final ScrapAndAnalysisService  scrapAndAnalysisService;
     private final AnalysisRepository analysisRepository;
 
-//    @PostMapping("/analyze")
-//    public CompletableFuture<ResponseEntity<ProductAnalysisCombinedResponse>> analyze(@RequestBody ProductAnalyzeRequest request) {
-//        return scrapAndAnalysisService.scrapAndAnalysis(request.productUrl(),false)
-//                .thenApply(ResponseEntity::ok)
-//                .exceptionally(ex -> {
-//                    log.error("Analiz sırasında kritik hata: {}", ex.getMessage());
-//                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//                });
-//    }
         @PostMapping("/analyze")
         public ResponseEntity<Map<String, Object>> analyze(@RequestBody ProductAnalyzeRequest request) {
 
-            // 1. İşlemi DB'ye kaydet ve ID'yi al (Senkron çalışır, hemen biter)
             Long productId = scrapAndAnalysisService.initiateAnalysis(request.productUrl(), false);
-
-            // 2. Asenkron işlemi Controller üzerinden tetikle (Proxy'den geçtiği için asenkron BAŞLAR)
             scrapAndAnalysisService.startAsyncProcess(productId, request.productUrl(), false);
 
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(
@@ -49,7 +36,7 @@ public class AiController {
         }
     @GetMapping("/status/{productId}")
     public ResponseEntity<?> checkStatus(@PathVariable Long productId) {
-        // DB'ye git statüye bak
+
         Analysis analysis = analysisRepository.getAnalysisByProduct_Id(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Bulunamadı"));
 
@@ -62,26 +49,14 @@ public class AiController {
                     .body(Map.of("status", "FAILED", "message", "Analiz başarısız."));
         }
 
-        // Eğer SUCCESSFUL ise senin mevcut metodunla gerçek veriyi dön
         return ResponseEntity.ok(scrapAndAnalysisService.getAnalysisById(productId));
     }
 
-//    @PostMapping("/re-analyze")
-//    public CompletableFuture<ResponseEntity<ProductAnalysisCombinedResponse>> reAnalyzeComments(@RequestBody ProductAnalyzeRequest request) {
-//        return scrapAndAnalysisService.scrapAndAnalysis(request.productUrl(),true)
-//                .thenApply(ResponseEntity::ok)
-//                .exceptionally(ex -> {
-//                    log.error("Yeniden analiz sırasında kritik hata: {}", ex.getMessage());
-//                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//                });
-//    }
     @PostMapping("/re-analyze")
     public ResponseEntity<Map<String, Object>> reAnalyzeComments(@RequestBody ProductAnalyzeRequest request) {
 
-        // 1. ForceRefresh true olarak başlat
         Long productId = scrapAndAnalysisService.initiateAnalysis(request.productUrl(), true);
 
-        // 2. Asenkron işlemi Controller üzerinden tetikle (forceRefresh = true)
         scrapAndAnalysisService.startAsyncProcess(productId, request.productUrl(), true);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(

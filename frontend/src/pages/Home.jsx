@@ -8,7 +8,6 @@ import { useToggleFollow } from "../hooks/useToggleFollow";
 import { useLocation } from 'react-router-dom';
 import WordPressPublisherCard from '../components/WordPressPublisherCard';
 
-// DÜZELTME 1: Fazladan importlar silindi, hepsi tek bir satırda birleştirildi
 import { pollProductAnalysis, getLatestAnalyzedProduct, getAnalyzedProductById } from "../services/productService";
 
 function Home() {
@@ -22,8 +21,6 @@ function Home() {
   
   const { toggle } = useToggleFollow();
 
-  // DÜZELTME 2: Çakışan diğer useEffect tamamen silindi. 
-  // Sadece bu akıllı useEffect kaldı. Bu her iki durumu da zaten kusursuz yönetiyor.
   useEffect(() => {
     async function loadInitialProduct() {
       try {
@@ -53,24 +50,6 @@ function Home() {
     loadInitialProduct();
   }, [passedProductId]);
 
-  // const handleScrap = async () => {
-  //   if (!productUrl) return; 
-
-  //   try {
-  //     setIsLoading(true); 
-      
-  //     const data = await scrapProduct(productUrl);
-      
-  //     setProduct(data.product);
-  //     setAnalysis(data.analysis);
-
-  //   } catch (error) {
-  //     console.error("Analiz sırasında hata oluştu:", error);
-  //     alert("Ürün analiz edilemedi. Lütfen linki kontrol edin.");
-  //   } finally {
-  //     setIsLoading(false); 
-  //   }
-  // };
 
   const [loadingMessage, setLoadingMessage] = useState("Ürün verileri yükleniyor, lütfen bekleyin...");
 
@@ -83,7 +62,7 @@ function Home() {
       
       // pollProductAnalysis fonksiyonu işlem bitene kadar arkada her 3 saniyede bir /status atar
       const data = await pollProductAnalysis(productUrl, (status, message) => {
-          setLoadingMessage(message); // Her sorgudaki ara mesajı arayüze yansıtabilirsin
+          setLoadingMessage(message);  
       });
       
       setProduct(data.product);
