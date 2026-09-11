@@ -6,7 +6,7 @@ import com.berkaykomur.backend.model.Product;
 import com.berkaykomur.backend.scrapper.Scrapper;
 
 public interface ScrapperService {
-    ProductResponse executeScrapping(String url,boolean forceRefresh);
+    ProductResponse executeScrapping(String url,boolean forceRefresh,Long userId);
     Scrapper getScrapper(String productUrl);
 
 }

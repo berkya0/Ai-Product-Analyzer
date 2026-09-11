@@ -26,9 +26,9 @@ public class WordPressPublisherService {
     private final WordPressHtmlBuilderService htmlBuilderService;
     private final RestClient restClient = RestClient.create();
 
-    public String publish(Long siteId, String customTitle,String status,ProductAnalysisCombinedResponse combinedData) {
+    public String publish(Long siteId, String customTitle,String status,ProductAnalysisCombinedResponse combinedData,Long userId) {
 
-        Site site = siteRepository.findById(siteId)
+        Site site = siteRepository.findByIdAndUser_Id(siteId,userId)
                 .orElseThrow(() -> new SiteNotFoundException("Site bulunamadı! ID: " + siteId));
 
         String htmlContent = htmlBuilderService.buildHtml(combinedData.product(), combinedData.analysis());

@@ -20,19 +20,19 @@ public class DashboardServiceImpl implements DashboardService {
     private final AnalysisRepository analysisRepository;
 
     @Override
-    public DashboardResponse getDashboard(){
-        long totalAnalysis = analysisRepository.count();
-        long successfulAnalysis = analysisRepository.countByStatus(Status.SUCCESS);
-        long failedAnalysis = analysisRepository.countByStatus(Status.FAILED);
-        long followingAnalysis=analysisRepository.countByProduct_IsFollowing(true);
+    public DashboardResponse getDashboard(Long userId){
+        long totalAnalysis = analysisRepository.countByProduct_User_Id(userId);
+        long successfulAnalysis = analysisRepository.countByProduct_User_IdAndStatus(userId, Status.SUCCESS);
+        long failedAnalysis = analysisRepository.countByProduct_User_IdAndStatus(userId, Status.FAILED);
+        long followingAnalysis = analysisRepository.countByProduct_IsFollowingAndProduct_User_Id(true, userId);
 
         return new  DashboardResponse(totalAnalysis,successfulAnalysis,failedAnalysis,followingAnalysis);
     }
 
     @Override
-    public Page<DashboardProductsResponse> getProducts(int page, int size) {
+    public Page<DashboardProductsResponse> getProducts(int page, int size,Long userId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Analysis> analyses = analysisRepository.findAll(pageable);
+        Page<Analysis> analyses = analysisRepository.findAllByProduct_User_IdOrderByCreatedAtDesc(pageable,userId);
 
         return analyses.map(analysis -> {
             Product product = analysis.getProduct();

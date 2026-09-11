@@ -41,5 +41,9 @@ public class Product extends BaseEntity {
     @Builder.Default
     private String category="Diğer";
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
+
 
 }

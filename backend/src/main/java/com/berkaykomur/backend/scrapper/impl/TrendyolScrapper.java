@@ -31,7 +31,7 @@ import java.util.Map;
 @Slf4j
 public class TrendyolScrapper implements Scrapper {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private static final int MAX_COMMENT_PAGES = 20;
 
     @Override
@@ -237,7 +237,7 @@ public class TrendyolScrapper implements Scrapper {
         return comments.stream()
                 // 1. Çok kısa / anlamsız yorumları ele (en az 15 karakter)
                 .filter(c -> c.text() != null && c.text().trim().length() > 15)
-                // 2. En çok beğeni alan ilk 70 yorumu seç (Temsil gücü en yüksek olanlar)
+                // 2. En çok beğeni alan ilk 170 yorumu seç (Temsil gücü en yüksek olanlar)
                 .sorted(Comparator.comparingInt(Comment::likesCount).reversed())
                 .limit(150)
                 .toList();

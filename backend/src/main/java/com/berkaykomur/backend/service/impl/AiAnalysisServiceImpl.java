@@ -31,12 +31,12 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
 
     @Transactional
     @Override
-    public AnalysisResult createAnalysis (Scrapper scrapper,Long productId,boolean forceRefresh) {
+    public AnalysisResult createAnalysis (Scrapper scrapper,Long productId,boolean forceRefresh,Long userId) {
         log.info("Analiz süreci başlatıldı. Product ID: {}", productId);
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdAndUser_Id(productId,userId)
                 .orElseThrow(() -> new ProductNotFoundException("Id'ye göre ürün bulunamadı: " + productId));
 
-        Optional<Analysis> existingAnalysisOp = analysisRepository.getAnalysisByProduct_Id(productId);
+        Optional<Analysis> existingAnalysisOp = analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId,userId);
         if(existingAnalysisOp.isPresent() && !forceRefresh) {
             Analysis existingAnalysis = existingAnalysisOp.get();
             if (existingAnalysis.getStatus() == Status.SUCCESS) {

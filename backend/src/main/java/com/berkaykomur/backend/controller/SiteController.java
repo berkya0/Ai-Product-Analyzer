@@ -2,10 +2,12 @@ package com.berkaykomur.backend.controller;
 
 import com.berkaykomur.backend.dto.SiteCreateRequest;
 import com.berkaykomur.backend.dto.SiteResponse;
+import com.berkaykomur.backend.jwt.CustomUserDetails;
 import com.berkaykomur.backend.service.SiteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,19 +21,21 @@ public class SiteController {
     private final SiteService siteService;
 
     @PostMapping
-    public ResponseEntity<String> createSite(@Valid @RequestBody SiteCreateRequest request) {
-        siteService.addSite(request);
+    public ResponseEntity<String> createSite(@Valid @RequestBody SiteCreateRequest request,
+                                             @AuthenticationPrincipal CustomUserDetails currentUser) {
+        siteService.addSite(request,currentUser.getUser());
         return ResponseEntity.ok(request.siteName() + " başarıyla sisteme eklendi.");
     }
 
     @GetMapping
-    public ResponseEntity<List<SiteResponse>> getActiveSites() {
-        List<SiteResponse> sites = siteService.getActiveSites();
+    public ResponseEntity<List<SiteResponse>> getActiveSites( @AuthenticationPrincipal CustomUserDetails currentUser) {
+        List<SiteResponse> sites = siteService.getActiveSites(currentUser.getUserId());
         return ResponseEntity.ok(sites);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSite(@PathVariable Long id) {
-        siteService.deleteSite(id);
+    public ResponseEntity<Void> deleteSite(@PathVariable Long id,
+                                           @AuthenticationPrincipal CustomUserDetails currentUser) {
+        siteService.deleteSite(id,currentUser.getUserId());
         return ResponseEntity.noContent().build();
     }
 }

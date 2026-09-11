@@ -24,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-
     private final ProductRepository productRepository;
     private final ScrapperService scrapperService;
     private final AnalysisRepository analysisRepository;
@@ -32,10 +31,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public void setFollow(Long productId,boolean isFollowing){
-        log.info("Ürünün takip durumu değiştirlecek. productId:{} isFollowing:{}",productId,isFollowing);
-        Product product = productRepository.findById(productId)
-                .orElseThrow(()->new ProductNotFoundException("Takip ayarı için seçilen ürün bulunamadı "));
+    public void setFollow(Long productId,boolean isFollowing,Long userId){
+
+        log.info("Kullanıcı id: {} -> Takip durumu değiştirilecek. ID: {}", userId, productId);
+
+        Product product = productRepository.findByIdAndUser_Id(productId, userId)
+                .orElseThrow(() -> new ProductNotFoundException("Ürün bulunamadı veya bu işlem için yetkiniz yok!"));
+
         product.setFollowing(isFollowing);
         log.info("Takip durumu değiştirildi. Durum:{}",isFollowing);
         productRepository.save(product);
@@ -44,9 +46,8 @@ public class ProductServiceImpl implements ProductService {
     @Scheduled(cron = "0 0 3 * * ?")
     @Async
     @Override
-    public void updateFollowedProductPrices() {
-        log.info("Otomatik takip ve güncelleme işlemi başlatıldı.");
-
+    public void updateFollowedProductPrices() {  // buna sonra bak
+        log.info("Otomatik takip ve güncelleme işlemi başlatıldı");
         List<Product> followedProducts = productRepository.findAllByIsFollowingIsTrue();
         if (followedProducts.isEmpty()) {
             log.info("Takip edilen hiçbir ürün bulunamadı.");
@@ -56,8 +57,7 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : followedProducts) {
             try {
                 log.info("Takip edilen ürün güncelleniyor. ID: {}, URL: {}", product.getId(), product.getProductUrl());
-                scrapperService.executeScrapping(product.getProductUrl(), true);
-
+                scrapperService.executeScrapping(product.getProductUrl(), true,product.getUser().getId());
                 Thread.sleep(4000);
 
             } catch (Exception e) {
@@ -69,20 +69,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProductDetailById(Long id) {
-        Product product=productRepository.findById(id)
+    public void deleteProductDetailById(Long id,Long userId) {
+        log.info("{} id'li kullanıcının ürünü silinecek,productID: {}", userId, id);
+        Product product=productRepository.findByIdAndUser_Id(id, userId)
                 .orElseThrow(()->new ProductNotFoundException("Ürün idye göre bulunamadı: "+id));
         productRepository.delete(product);
     }
 
     @Override
-    public List<CompareResults> compareProducts(List<Long> productIds){
+    public List<CompareResults> compareProducts(List<Long> productIds,Long userId){
         log.info("Seçilen ürünler karşılaştırılacak. Product IDs: {}", productIds);
         if (productIds == null || productIds.size() != 2) {
             throw new IllegalArgumentException("Karşılaştırma için tam olarak 2 ürün seçilmelidir.");
         }
 
-        List<Analysis> analyses = analysisRepository.findAllByProduct_IdIn(productIds);
+        List<Analysis> analyses = analysisRepository.findAllByProduct_IdInAndProduct_User_Id(productIds,userId);
+        if (analyses.size() != 2) {
+            throw new ProductNotFoundException("Karşılaştırılmak istenen ürünlerden biri veya birkaçı bulunamadı ya da erişim yetkiniz yok.");
+        }
         if (!analyses.getFirst().getProduct().getCategory().equals(analyses.getLast().getProduct().getCategory())) {
             String message = String.format("Farklı kategorideki ürünler karşılaştırılamaz! Ürün 1: %s, Ürün 2: %s",
                     analyses.getFirst().getProduct().getCategory(),

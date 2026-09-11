@@ -1,11 +1,13 @@
 package com.berkaykomur.backend.controller;
 
 import com.berkaykomur.backend.dto.ProductAnalysisCombinedResponse;
+import com.berkaykomur.backend.jwt.CustomUserDetails;
 import com.berkaykomur.backend.service.WordPressHtmlBuilderService;
 import com.berkaykomur.backend.service.WordPressPublisherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,10 +23,10 @@ public class WordPressPublishController {
             @PathVariable Long siteId,
             @RequestParam(required = false) String title,
             @RequestParam(required = false, defaultValue = "publish") String status,
-            @RequestBody ProductAnalysisCombinedResponse combinedData) {
+            @RequestBody ProductAnalysisCombinedResponse combinedData,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
 
-        String wpResponse = publisherService.publish(siteId, title, status,combinedData);
-
+        String wpResponse = publisherService.publish(siteId, title, status,combinedData,currentUser.getUserId());
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(wpResponse);

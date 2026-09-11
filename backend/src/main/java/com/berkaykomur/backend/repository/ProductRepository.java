@@ -1,5 +1,6 @@
 package com.berkaykomur.backend.repository;
 
+import com.berkaykomur.backend.model.Analysis;
 import com.berkaykomur.backend.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,7 +14,6 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
 
-    Optional<Product> findByProductUrl(String url);
 
     @Modifying
     @Query(
@@ -26,7 +26,11 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             value = "SELECT * FROM product WHERE product_url = :productUrl",
             nativeQuery = true
     )
-    Optional<Product> findProductIncludingDeleted(@Param("productUrl") String productUrl);
+    Optional<Product> findProductIncludingDeletedAndUser_Id(@Param("productUrl") String productUrl,Long userId);
 
     List<Product> findAllByIsFollowingIsTrue();
+
+
+    Optional<Product> findByIdAndUser_Id(Long productId, Long userId);
+
 }

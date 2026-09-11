@@ -37,24 +37,24 @@ public class ScrapAndAnalysisService {
     private final ProductRepository productRepository;
 
     @Async("analysisTaskExecutor")
-    public void startAsyncProcess(Long productId, String productUrl, boolean forceRefresh) {
+    public void startAsyncProcess(Long productId, String productUrl, boolean forceRefresh,Long userId) {
         log.info("Ürün analizi işlenmeye başlandı. Product ID: {} forceRefresh:{}", productId,forceRefresh);
         try {
             Scrapper scrapper = scrapperService.getScrapper(productUrl);
-            aiAnalysisService.createAnalysis(scrapper, productId, forceRefresh);
+            aiAnalysisService.createAnalysis(scrapper, productId, forceRefresh,userId);
 
         } catch (Exception e) {
             log.error("İşlem sırasında hata oldu, FAILED yapılıyor. ID: {}", productId, e);
-            analysisRepository.getAnalysisByProduct_Id(productId).ifPresent(analysis -> {
+            analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId,userId).ifPresent(analysis -> {
                 analysis.setStatus(Status.FAILED);
                 analysisRepository.save(analysis);
             });
         }
     }
     @Transactional
-    public Long initiateAnalysis(String productUrl, boolean forceRefresh) {
-        ProductResponse scrappedProduct = scrapperService.executeScrapping(productUrl, forceRefresh);
-        Product product = productRepository.findProductIncludingDeleted(scrappedProduct.productUrl()).
+    public Long initiateAnalysis(String productUrl, boolean forceRefresh,Long userId) {
+        ProductResponse scrappedProduct = scrapperService.executeScrapping(productUrl, forceRefresh, userId);
+        Product product = productRepository.findProductIncludingDeletedAndUser_Id(scrappedProduct.productUrl(), userId).
                 orElseThrow(()-> new ProductNotFoundException("Ürün bilgileri çekilemedi :"+scrappedProduct.productUrl()));
 
         Optional<Analysis> analysis = analysisRepository.getAnalysisByProduct_Id(product.getId());
@@ -68,9 +68,9 @@ public class ScrapAndAnalysisService {
         return product.getId();
     }
 
-    public ProductAnalysisCombinedResponse getLatestAnalysis() {
+    public ProductAnalysisCombinedResponse getLatestAnalysis(Long userId) {
         log.info("En son yapılan analiz sorgulanıyor...");
-        Optional<Analysis> latestAnalysis = analysisRepository.findFirstByOrderByCreatedAtDesc();
+        Optional<Analysis> latestAnalysis = analysisRepository.findFirstByProduct_User_IdOrderByCreatedAtDesc(userId);
 
         if (latestAnalysis.isEmpty()) {
             log.warn("Sistemde kayıtlı herhangi bir analiz bulunamadı.");
@@ -85,10 +85,10 @@ public class ScrapAndAnalysisService {
         return new ProductAnalysisCombinedResponse(latestProductDto, latestAnalysisDto);
     }
 
-    public ProductAnalysisCombinedResponse getAnalysisById(Long productId) {
+    public ProductAnalysisCombinedResponse getAnalysisById(Long productId,Long userId) {
         log.info("Product ID ile analiz sorgulanıyor. ID: {}", productId);
 
-        Analysis analysis = analysisRepository.getAnalysisByProduct_Id(productId).
+        Analysis analysis = analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId,userId).
                 orElseThrow(() -> {
                     log.error("Ürün ID ile bulunamadı. ID: {}", productId);
                     return new ProductNotFoundException("Ürün id ile bulunamadı: " + productId);
