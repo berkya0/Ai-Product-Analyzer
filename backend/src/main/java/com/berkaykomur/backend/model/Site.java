@@ -1,10 +1,7 @@
 package com.berkaykomur.backend.model;
 
 import com.berkaykomur.backend.util.PasswordEncryptionConverter;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,4 +31,8 @@ public class Site extends BaseEntity{
     @Column(nullable = false)
     @Convert(converter = PasswordEncryptionConverter.class)
     private String appPassword;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 }
