@@ -1,10 +1,15 @@
 package com.berkaykomur.backend.service;
 
+<<<<<<< HEAD
 import com.berkaykomur.backend.jwt.CustomUserDetails;
 import com.berkaykomur.backend.model.UserEntity;
 import com.berkaykomur.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+=======
+import com.berkaykomur.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+>>>>>>> 6ee5fa01333b208303ad7c19c60004c8731e00d1
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,10 +22,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
+<<<<<<< HEAD
     public UserDetails loadUserByUsername(@NotNull String username) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Kullanıcı bulunamadı: " + username));
 
         return new CustomUserDetails(user);
+=======
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Kullanıcı bulunamadı: " + username));
+>>>>>>> 6ee5fa01333b208303ad7c19c60004c8731e00d1
     }
 }

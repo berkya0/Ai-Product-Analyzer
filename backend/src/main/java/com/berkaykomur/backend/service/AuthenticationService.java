@@ -7,7 +7,10 @@ import com.berkaykomur.backend.dto.user.RegisterRequest;
 import com.berkaykomur.backend.exception.user.EmailAlreadyExistsException;
 import com.berkaykomur.backend.exception.user.UserAlreadyExistsException;
 import com.berkaykomur.backend.exception.user.UsernameNotFoundException;
+<<<<<<< HEAD
 import com.berkaykomur.backend.jwt.CustomUserDetails;
+=======
+>>>>>>> 6ee5fa01333b208303ad7c19c60004c8731e00d1
 import com.berkaykomur.backend.jwt.JwtService;
 import com.berkaykomur.backend.model.UserEntity;
 import com.berkaykomur.backend.repository.UserRepository;
@@ -50,7 +53,11 @@ public class AuthenticationService {
         UserEntity savedUser = userRepository.save(user);
         log.info("Kullanıcı başarıyla kaydedildi: {}", request.username());
 
+<<<<<<< HEAD
         String token = jwtService.generateToken(new HashMap<>(),  new CustomUserDetails(savedUser));
+=======
+        String token = jwtService.generateToken(new HashMap<>(), user);
+>>>>>>> 6ee5fa01333b208303ad7c19c60004c8731e00d1
         return new AuthResponse(savedUser.getId(),request.username(),token);
     }
 
@@ -68,7 +75,11 @@ public class AuthenticationService {
                 .orElseThrow(()->new UsernameNotFoundException("Kullanıcı adı bulunamadı: "+request.username()));
 
         log.info("Giriş başarılı: {}", request.username());
+<<<<<<< HEAD
         String token = jwtService.generateToken(new HashMap<>(), new CustomUserDetails(user));
+=======
+        String token = jwtService.generateToken(new HashMap<>(), user);
+>>>>>>> 6ee5fa01333b208303ad7c19c60004c8731e00d1
         return new AuthResponse(user.getId(),request.username(),token);
     }
 }
