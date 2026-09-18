@@ -31,6 +31,7 @@ import java.util.HashMap;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserRepository userRepository;
@@ -65,6 +66,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         log.info("Giriş denemesi: {}", request.username());
         authenticationManager.authenticate(
@@ -84,6 +86,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional
     public AuthResponse refreshAccessToken(RefreshTokenRequest requestRefreshToken) {
         return refreshTokenService.findByToken(requestRefreshToken.refreshToken())
                 .map(refreshTokenService::verifyExpiration)

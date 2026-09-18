@@ -12,10 +12,10 @@ import com.berkaykomur.backend.repository.AnalysisRepository;
 import com.berkaykomur.backend.repository.ProductRepository;
 import com.berkaykomur.backend.scrapper.Scrapper;
 import com.berkaykomur.backend.service.AiAnalysisService;
+import com.berkaykomur.backend.util.AnalysisSaveHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -28,45 +28,27 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
     private final AnalysisMapper analysisMapper;
     private final AnalysisRepository analysisRepository;
     private final ProductRepository productRepository;
+    private final AnalysisSaveHelper analysisSaveHelper;
 
-    @Transactional
     @Override
-    public AnalysisResult createAnalysis (Scrapper scrapper,Long productId,boolean forceRefresh,Long userId) {
+    public AnalysisResult createAnalysis(Scrapper scrapper, Long productId, boolean forceRefresh, Long userId) {
         log.info("Analiz süreci başlatıldı. Product ID: {}", productId);
-        Product product = productRepository.findByIdAndUser_Id(productId,userId)
+        Product product = productRepository.findByIdAndUser_Id(productId, userId)
                 .orElseThrow(() -> new ProductNotFoundException("Id'ye göre ürün bulunamadı: " + productId));
 
-        Optional<Analysis> existingAnalysisOp = analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId,userId);
-        if(existingAnalysisOp.isPresent() && !forceRefresh) {
+        Optional<Analysis> existingAnalysisOp = analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId, userId);
+        if (existingAnalysisOp.isPresent() && !forceRefresh) {
             Analysis existingAnalysis = existingAnalysisOp.get();
             if (existingAnalysis.getStatus() == Status.SUCCESS) {
-                log.info("Veritabanında mevcut analiz bulundu. Yeniden AI isteği atılmayacak. Product ID: {}", productId);
                 return analysisMapper.toAnalysisResult(existingAnalysis);
             }
-            log.info("Mevcut analiz PENDING durumunda, analiz baştan işlenecek. Product ID: {}", productId);
         }
-
-        String productUrl=product.getProductUrl();
-        log.debug("Yapay zeka analizi için istek atılıyor. URL: {}", productUrl);
-        AnalysisResult analysisResult=aiAnalysis.analyzeComments(scrapper,productUrl);
-        if(analysisResult==null ){
-            throw new AiAnalaysisNotFoundException("Analiz sonuçları null döndü. Analiz yapılamadı: "+productUrl);
-
+        String productUrl = product.getProductUrl();
+        AnalysisResult analysisResult = aiAnalysis.analyzeComments(scrapper, productUrl);
+        if (analysisResult == null) {
+            throw new AiAnalaysisNotFoundException("Analiz sonuçları null döndü: " + productUrl);
         }
-
-        if (existingAnalysisOp.isEmpty()) {
-           throw new AiAnalaysisNotFoundException("Analiz akışında hata PENDING analiz yok");
-        }
-        Analysis analysisEntity=existingAnalysisOp.get();
-        log.info("Ürün analizi oluşşturuluyor. Product ID: {}", productId);
-        analysisMapper.updateAnalysisFromDto(analysisResult, analysisEntity);
-        analysisEntity.setStatus(Status.SUCCESS);
-        analysisEntity.setProduct(product);
-        log.info("Yapay zeka analizi başarılı oldu");
-        analysisRepository.save(analysisEntity);
-
-        return analysisMapper.toAnalysisResult(analysisEntity);
-
+        return analysisSaveHelper.saveAnalysisResult(product, existingAnalysisOp, analysisResult);
     }
 
 

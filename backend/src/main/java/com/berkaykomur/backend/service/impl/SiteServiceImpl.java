@@ -18,6 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class SiteServiceImpl implements SiteService {
 
     private final SiteRepository siteRepository;

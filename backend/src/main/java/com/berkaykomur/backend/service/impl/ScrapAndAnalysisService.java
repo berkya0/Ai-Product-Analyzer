@@ -25,6 +25,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ScrapAndAnalysisService {
 
     private final ScrapperService scrapperService;
@@ -35,6 +36,7 @@ public class ScrapAndAnalysisService {
     private final ProductRepository productRepository;
 
     @Async("analysisTaskExecutor")
+    @Transactional
     public void startAsyncProcess(Long productId, String productUrl, boolean forceRefresh,Long userId) {
         log.info("Ürün analizi işlenmeye başlandı. Product ID: {} forceRefresh:{}", productId,forceRefresh);
         try {

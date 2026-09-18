@@ -28,7 +28,6 @@ public class WordPressPublisherServiceImpl implements WordPressPublisherService 
     private final WordPressHtmlBuilderService htmlBuilderService;
     private final RestClient restClient = RestClient.create();
 
-    @Transactional
     @Override
     public String publish(Long siteId, String customTitle,String status,ProductAnalysisCombinedResponse combinedData,Long userId) {
 

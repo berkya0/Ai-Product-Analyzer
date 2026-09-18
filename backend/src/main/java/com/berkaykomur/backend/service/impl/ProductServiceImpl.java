@@ -22,6 +22,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -69,6 +70,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void deleteProductDetailById(Long id,Long userId) {
         log.info("{} id'li kullanıcının ürünü silinecek,productID: {}", userId, id);
         Product product=productRepository.findByIdAndUser_Id(id, userId)
