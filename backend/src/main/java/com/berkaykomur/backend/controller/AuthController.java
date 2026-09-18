@@ -1,9 +1,11 @@
 package com.berkaykomur.backend.controller;
 
-import com.berkaykomur.backend.dto.user.AuthResponse;
-import com.berkaykomur.backend.dto.user.LoginRequest;
-import com.berkaykomur.backend.dto.user.RegisterRequest;
+import com.berkaykomur.backend.dto.AuthResponse;
+import com.berkaykomur.backend.dto.LoginRequest;
+import com.berkaykomur.backend.dto.RefreshTokenRequest;
+import com.berkaykomur.backend.dto.RegisterRequest;
 import com.berkaykomur.backend.service.AuthenticationService;
+import com.berkaykomur.backend.service.impl.AuthenticationServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authenticationService.login(request);
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+        AuthResponse response = authenticationService.refreshAccessToken(request);
         return ResponseEntity.ok(response);
     }
 }

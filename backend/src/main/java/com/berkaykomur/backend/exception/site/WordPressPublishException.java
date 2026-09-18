@@ -1,5 +1,6 @@
-package com.berkaykomur.backend.exception;
+package com.berkaykomur.backend.exception.site;
 
+import com.berkaykomur.backend.exception.BaseException;
 import org.springframework.http.HttpStatus;
 
 public class WordPressPublishException extends BaseException {

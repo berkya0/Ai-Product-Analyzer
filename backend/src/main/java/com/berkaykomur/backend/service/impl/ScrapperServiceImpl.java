@@ -2,7 +2,7 @@ package com.berkaykomur.backend.service.impl;
 
 import com.berkaykomur.backend.dto.ProductResponse;
 import com.berkaykomur.backend.dto.ScrapperResult;
-import com.berkaykomur.backend.exception.UnspportedMarketPlaceException;
+import com.berkaykomur.backend.exception.analysis.UnspportedMarketPlaceException;
 import com.berkaykomur.backend.exception.user.UsernameNotFoundException;
 import com.berkaykomur.backend.mapper.ProductMapper;
 import com.berkaykomur.backend.model.Product;

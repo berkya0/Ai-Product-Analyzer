@@ -1,6 +1,7 @@
 package com.berkaykomur.backend.jwt;
 
-import com.berkaykomur.backend.service.CustomUserDetailsService;
+import com.berkaykomur.backend.model.UserEntity;
+import com.berkaykomur.backend.service.impl.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -50,24 +50,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                if (jwtService.isTokenValidWithoutDB(jwt)) {
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    Long userId = jwtService.extractUserId(jwt);
+
+                    // 2. Veritabanına GİTMEDEN, elimizdeki verilerle bir UserEntity yaratıyoruz
+                    UserEntity dummyUser = UserEntity.builder()
+                            .id(userId)
+                            .username(username)
+                            // Şifre veya email gibi alanlara Controller'da ihtiyacın yoksa null kalabilir.
+                            .build();
+
+                    // 3. Bunu senin CustomUserDetails sınıfına sarıyoruz
+                    CustomUserDetails userDetails = new CustomUserDetails(dummyUser);
+
+                    // 4. Spring Security'ye String değil, objenin kendisini veriyoruz!
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
+                            java.util.List.of()
                     );
 
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         } catch (Exception e) {
-            log.warn("JWT Authentication failed: {}", e.getMessage());
+            log.warn("JWT doğrulaması basarisiz: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);

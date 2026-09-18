@@ -2,8 +2,8 @@ package com.berkaykomur.backend.service.impl;
 
 import com.berkaykomur.backend.ai.AiAnalysis;
 import com.berkaykomur.backend.dto.AnalysisResult;
-import com.berkaykomur.backend.exception.AiAnalaysisNotFoundException;
-import com.berkaykomur.backend.exception.ProductNotFoundException;
+import com.berkaykomur.backend.exception.analysis.AiAnalaysisNotFoundException;
+import com.berkaykomur.backend.exception.product.ProductNotFoundException;
 import com.berkaykomur.backend.mapper.AnalysisMapper;
 import com.berkaykomur.backend.model.Analysis;
 import com.berkaykomur.backend.model.Product;

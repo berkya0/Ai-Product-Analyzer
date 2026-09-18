@@ -1,6 +1,6 @@
 package com.berkaykomur.backend.util;
 
-import com.berkaykomur.backend.exception.EncryptionException;
+import com.berkaykomur.backend.exception.site.EncryptionException;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import org.springframework.beans.factory.annotation.Value;

@@ -21,7 +21,7 @@ public class Analysis extends BaseEntity {
     private Double aiScore;
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Status status=Status.PENDING; // not: Pending işlevi çalışması düşünülecek.
+    private Status status=Status.PENDING;
 
     @Column(columnDefinition = "TEXT")
     private String summary;

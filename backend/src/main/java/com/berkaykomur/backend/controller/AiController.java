@@ -2,7 +2,7 @@ package com.berkaykomur.backend.controller;
 
 import com.berkaykomur.backend.dto.ProductAnalysisCombinedResponse;
 import com.berkaykomur.backend.dto.ProductAnalyzeRequest;
-import com.berkaykomur.backend.exception.ProductNotFoundException;
+import com.berkaykomur.backend.exception.product.ProductNotFoundException;
 import com.berkaykomur.backend.jwt.CustomUserDetails;
 import com.berkaykomur.backend.model.Analysis;
 import com.berkaykomur.backend.model.Status;
@@ -25,18 +25,18 @@ public class AiController {
     private final ScrapAndAnalysisService  scrapAndAnalysisService;
     private final AnalysisRepository analysisRepository;
 
-        @PostMapping("/analyze")
-        public ResponseEntity<Map<String, Object>> analyze(@RequestBody ProductAnalyzeRequest request,
-                                                             @AuthenticationPrincipal CustomUserDetails currentUser) {
+    @PostMapping("/analyze")
+    public ResponseEntity<Map<String, Object>> analyze(@RequestBody ProductAnalyzeRequest request,
+                                                       @AuthenticationPrincipal CustomUserDetails currentUser) {
 
-            Long productId = scrapAndAnalysisService.initiateAnalysis(request.productUrl(), false, currentUser.getUserId());
-            scrapAndAnalysisService.startAsyncProcess(productId, request.productUrl(), false,currentUser.getUserId());
+        Long productId = scrapAndAnalysisService.initiateAnalysis(request.productUrl(), false, currentUser.getUserId());
+        scrapAndAnalysisService.startAsyncProcess(productId, request.productUrl(), false, currentUser.getUserId());
 
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(
-                    "message", "İşlem sıraya alındı, analiz ediliyor.",
-                    "productId", productId
-            ));
-        }
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(
+                "message", "İşlem sıraya alındı, analiz ediliyor.",
+                "productId", productId
+        ));
+    }
     @GetMapping("/status/{productId}")
     public ResponseEntity<?> checkStatus(@PathVariable Long productId,
                                          @AuthenticationPrincipal CustomUserDetails currentUser) {

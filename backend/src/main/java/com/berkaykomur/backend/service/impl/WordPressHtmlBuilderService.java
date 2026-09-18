@@ -1,4 +1,4 @@
-package com.berkaykomur.backend.service;
+package com.berkaykomur.backend.service.impl;
 
 import com.berkaykomur.backend.dto.AnalysisResult;
 import com.berkaykomur.backend.dto.ProductResponse;

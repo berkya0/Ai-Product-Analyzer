@@ -1,4 +1,4 @@
-package com.berkaykomur.backend.dto.user;
+package com.berkaykomur.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

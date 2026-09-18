@@ -3,7 +3,7 @@ package com.berkaykomur.backend.service.impl;
 import com.berkaykomur.backend.dto.AnalysisResult;
 import com.berkaykomur.backend.dto.ProductAnalysisCombinedResponse;
 import com.berkaykomur.backend.dto.ProductResponse;
-import com.berkaykomur.backend.exception.ProductNotFoundException;
+import com.berkaykomur.backend.exception.product.ProductNotFoundException;
 import com.berkaykomur.backend.mapper.AnalysisMapper;
 import com.berkaykomur.backend.mapper.ProductMapper;
 import com.berkaykomur.backend.model.Analysis;
@@ -20,9 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service

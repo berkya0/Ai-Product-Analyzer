@@ -11,12 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AnalysisRepository extends JpaRepository<Analysis,Long> {
-    Optional<Analysis> getAnalysisByProduct(Product product);
-    long countByStatus(Status status);
-    long countByProduct_IsFollowing(boolean isFollowing);
+
     Optional<Analysis> getAnalysisByProduct_Id(Long productId);
-    List<Analysis> findAllByProduct_IdIn(List<Long> productIds);
-    Optional<Analysis> findFirstByOrderByCreatedAtDesc();
 
     Optional<Analysis> getAnalysisByProduct_IdAndProduct_User_Id(Long productId, Long userId);
     Optional<Analysis> findFirstByProduct_User_IdOrderByCreatedAtDesc(Long userId);
@@ -28,7 +24,6 @@ public interface AnalysisRepository extends JpaRepository<Analysis,Long> {
     long countByProduct_User_IdAndStatus(Long userId, Status status);
 
     long countByProduct_IsFollowingAndProduct_User_Id(boolean isFollowing, Long userId);
-
 
     List<Analysis> findAllByProduct_IdInAndProduct_User_Id(List<Long> productIds, Long userId);
 }

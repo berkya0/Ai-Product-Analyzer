@@ -2,8 +2,8 @@ package com.berkaykomur.backend.controller;
 
 import com.berkaykomur.backend.dto.ProductAnalysisCombinedResponse;
 import com.berkaykomur.backend.jwt.CustomUserDetails;
-import com.berkaykomur.backend.service.WordPressHtmlBuilderService;
 import com.berkaykomur.backend.service.WordPressPublisherService;
+import com.berkaykomur.backend.service.impl.WordPressHtmlBuilderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

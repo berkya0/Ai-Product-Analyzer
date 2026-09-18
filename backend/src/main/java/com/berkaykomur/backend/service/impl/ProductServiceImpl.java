@@ -1,8 +1,8 @@
 package com.berkaykomur.backend.service.impl;
 
 import com.berkaykomur.backend.dto.CompareResults;
-import com.berkaykomur.backend.exception.CategoryMismatchException;
-import com.berkaykomur.backend.exception.ProductNotFoundException;
+import com.berkaykomur.backend.exception.product.CategoryMismatchException;
+import com.berkaykomur.backend.exception.product.ProductNotFoundException;
 import com.berkaykomur.backend.mapper.AnalysisMapper;
 import com.berkaykomur.backend.model.Analysis;
 import com.berkaykomur.backend.model.Product;

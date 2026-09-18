@@ -19,7 +19,7 @@ public class JwtService {
     @Value("${jwt.secret-key}")
     private String jwtSecret;
     @Value("${jwt.accsess-token-expiration}")
-    public long accsessTokenExpiration;
+    private long accessTokenExpiration;
 
 
     public String extractUsername(String token) {
@@ -31,9 +31,11 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, accsessTokenExpiration);
+        if (userDetails instanceof CustomUserDetails customUser) {
+            extraClaims.put("userId", customUser.getUserId());
+        }
+        return buildToken(extraClaims, userDetails, accessTokenExpiration);
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
@@ -70,5 +72,14 @@ public class JwtService {
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+    public boolean isTokenValidWithoutDB(String token) {
+        return !isTokenExpired(token);
+    }
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> {
+            Number userId = claims.get("userId", Number.class);
+            return userId != null ? userId.longValue() : null;
+        });
     }
 }

@@ -2,10 +2,10 @@ package com.berkaykomur.backend.scrapper.impl;
 
 import com.berkaykomur.backend.dto.Comment;
 import com.berkaykomur.backend.dto.ScrapperResult;
-import com.berkaykomur.backend.exception.InvalidProductUrlException;
-import com.berkaykomur.backend.exception.JsonLdNotFoundException;
-import com.berkaykomur.backend.exception.ProductParsingException;
-import com.berkaykomur.backend.exception.ScrapingConnectionException;
+import com.berkaykomur.backend.exception.analysis.InvalidProductUrlException;
+import com.berkaykomur.backend.exception.analysis.JsonLdNotFoundException;
+import com.berkaykomur.backend.exception.product.ProductParsingException;
+import com.berkaykomur.backend.exception.analysis.ScrapingConnectionException;
 import com.berkaykomur.backend.scrapper.Scrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

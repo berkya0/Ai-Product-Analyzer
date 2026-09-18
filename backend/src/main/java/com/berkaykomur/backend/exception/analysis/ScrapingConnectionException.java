@@ -1,5 +1,6 @@
-package com.berkaykomur.backend.exception;
+package com.berkaykomur.backend.exception.analysis;
 
+import com.berkaykomur.backend.exception.BaseException;
 import org.springframework.http.HttpStatus;
 
 public class ScrapingConnectionException extends BaseException {
