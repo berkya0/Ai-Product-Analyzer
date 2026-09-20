@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record RegisterRequest(
+
+        @NotBlank(message ="Lütfen adınızı girin." )
+        String fullName,
         @NotBlank(message = "Kullanıcı adı boş olamaz")
         @Size(min=3,message = "Kullanıcı adı en az üç karakterden oluşmalı")
         String username,

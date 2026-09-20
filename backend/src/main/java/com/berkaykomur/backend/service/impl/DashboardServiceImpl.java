@@ -22,13 +22,8 @@ public class DashboardServiceImpl implements DashboardService {
     private final AnalysisRepository analysisRepository;
 
     @Override
-    public DashboardResponse getDashboard(Long userId){
-        long totalAnalysis = analysisRepository.countByProduct_User_Id(userId);
-        long successfulAnalysis = analysisRepository.countByProduct_User_IdAndStatus(userId, Status.SUCCESS);
-        long failedAnalysis = analysisRepository.countByProduct_User_IdAndStatus(userId, Status.FAILED);
-        long followingAnalysis = analysisRepository.countByProduct_IsFollowingAndProduct_User_Id(true, userId);
-
-        return new  DashboardResponse(totalAnalysis,successfulAnalysis,failedAnalysis,followingAnalysis);
+    public DashboardResponse getDashboard(Long userId) {
+        return analysisRepository.getDashboardStats(userId);
     }
 
     @Override

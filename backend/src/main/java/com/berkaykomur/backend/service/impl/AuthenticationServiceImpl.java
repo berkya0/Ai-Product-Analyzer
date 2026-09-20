@@ -5,6 +5,7 @@ import com.berkaykomur.backend.dto.AuthResponse;
 import com.berkaykomur.backend.dto.LoginRequest;
 import com.berkaykomur.backend.dto.RefreshTokenRequest;
 import com.berkaykomur.backend.dto.RegisterRequest;
+import com.berkaykomur.backend.exception.refreshToken.RefreshTokenNotFoundException;
 import com.berkaykomur.backend.exception.user.EmailAlreadyExistsException;
 import com.berkaykomur.backend.exception.user.UserAlreadyExistsException;
 import com.berkaykomur.backend.exception.user.UsernameNotFoundException;
@@ -52,6 +53,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new EmailAlreadyExistsException("Email sisteme kayıtlı: "+request.email());
         }
         UserEntity user = UserEntity.builder()
+                .fullName(request.fullName())
                 .username(request.username())
                 .password(passwordEncoder.encode(request.password()))
                 .email(request.email())
@@ -93,11 +95,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .map(RefreshToken::getUser)
                 .map(user -> {
                     String accessToken = jwtService.generateToken(new HashMap<>(), new CustomUserDetails(user));
-                    refreshTokenService.deleteByToken(requestRefreshToken.refreshToken());
+                    refreshTokenService.deleteByToken(requestRefreshToken.refreshToken(), user.getId());
                     RefreshToken refreshToken=refreshTokenService.createRefreshToken(user.getId());
                     return new AuthResponse(user.getId(), user.getUsername(), accessToken, refreshToken.getRefreshToken());
                 })
-                .orElseThrow(() -> new RuntimeException("Refresh token bulunamadı veya geçersiz!"));
+                .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh token bulunamadı veya geçersiz!"));
+    }
+    @Override
+    @Transactional
+    public void logout(RefreshTokenRequest request, Long userId) {
+        if (request != null && request.refreshToken() != null && !request.refreshToken().isBlank()) {
+            log.info("Çıkış yapılıyor, refresh token siliniyor.");
+            refreshTokenService.deleteByToken(request.refreshToken(),userId);
+            log.info("Refresh token başarıyla silindi.");
+        }
     }
 
 

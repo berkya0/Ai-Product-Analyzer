@@ -48,6 +48,7 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
         if (analysisResult == null) {
             throw new AiAnalaysisNotFoundException("Analiz sonuçları null döndü: " + productUrl);
         }
+        log.info("Analiz islemi sonuclandi");
         return analysisSaveHelper.saveAnalysisResult(product, existingAnalysisOp, analysisResult);
     }
 

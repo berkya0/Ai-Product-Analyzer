@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// src/components/SiteList.jsx
+import React, { useState } from "react";
 import { FiTrash2, FiGlobe, FiUser, FiCheckCircle } from "react-icons/fi";
 import { deleteSite } from "../services/productService";
 
@@ -18,7 +19,7 @@ function SiteList({ sites, onSiteDeleted }) {
       }
     } catch (error) {
       console.error("Site silme hatası:", error);
-      alert("Site silinirken bir hata oluştu.");
+      alert(error.message || "Site silinirken bir hata oluştu.");
     } finally {
       setLoadingId(null);
     }
@@ -57,32 +58,27 @@ function SiteList({ sites, onSiteDeleted }) {
           <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
             {sites.map((site) => (
               <tr key={site.id} className="hover:bg-slate-50/50 transition">
-                {/* Site Adı */}
                 <td className="py-3.5 px-4 font-semibold text-slate-900 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
                   {site.siteName}
                 </td>
 
-                {/* Site Linki */}
                 <td className="py-3.5 px-4 text-blue-600 truncate max-w-[200px]">
                   <a href={site.siteUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
                     {site.siteUrl}
                   </a>
                 </td>
 
-                {/* Kullanıcı Adı */}
-                <td className="py-3.5 px-4 text-slate-600 flex items-center gap-1.5 pt-4">
+                <td className="py-3.5 px-4 text-slate-600 flex items-center gap-1.5">
                   <FiUser className="text-slate-400 text-xs" /> {site.username}
                 </td>
 
-                {/* Status Durumu */}
                 <td className="py-3.5 px-4">
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60">
                     <FiCheckCircle className="text-emerald-500" /> Aktif
                   </span>
                 </td>
 
-                {/* Silme Tuşu */}
                 <td className="py-3.5 px-4 text-right">
                   <button
                     onClick={() => handleDelete(site.id, site.siteName)}

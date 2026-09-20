@@ -1,84 +1,44 @@
-export async function fetchStates(){
-     const response = await fetch(
-        `http://localhost:8080/dashboard/get-cards`,
-        {
-            method: "GET",
-        }
-    );
-    const data = await response.json();
-    if(!response.ok){
-        throw new Error(data.message);
+import { fetchWithAuth } from "./apiClient";
 
-    }
-    return data;
-
+/**
+ * Dashboard kart verilerini (istatistikleri) getirir
+ */
+export async function fetchStates() {
+  return await fetchWithAuth("/dashboard/cards");
 }
 
+/**
+ * Dashboard için sayfalanmış ürün listesini getirir
+ */
 export async function fetchProducts(page = 0, size = 10) {
   try {
-    const response = await fetch(
-      `http://localhost:8080/dashboard/get-products?page=${page}&size=${size}`,
-      {
-        method: "GET",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP Hatası! Statü: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data; 
+    return await fetchWithAuth(`/dashboard/products?page=${page}&size=${size}`);
   } catch (error) {
     console.error("Ürünler çekilirken hata oluştu:", error);
+    throw error;
   }
 }
+
+/**
+ * Ürünün yorumlarını yeniden analiz eder
+ */
 export async function reAnalyzeProduct(productUrl) {
-  try {
-    const response = await fetch(
-      `http://localhost:8080/ai/re-analyze`, 
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ productUrl: productUrl }), 
-      }
-    );
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => null); 
-        throw new Error(errorData?.message || `HTTP Hatası! Statü: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
-    
-  } catch (error) {
-    console.error("Yeniden analiz isteği sırasında hata oluştu:", error);
-    throw error; 
-  }
+  return await fetchWithAuth("/ai/re-analyze", {
+    method: "POST",
+    body: JSON.stringify({ productUrl }),
+  });
 }
+
+/**
+ * Ürünün takip durumunu günceller (PATCH /api/product/set-following/{productId}?isFollowing=true/false)
+ */
 export async function setProductFollowing(productId, isFollowing) {
   try {
-    const response = await fetch(
-      `http://localhost:8080/product/set-following/${productId}/follow?isFollowing=${isFollowing}`, 
-      {
-        method: "PATCH",
-      }
-    );
-
-    if (!response.ok) {
-        const errorData = await response.text().catch(() => null); 
-        throw new Error(errorData || `HTTP Hatası! Statü: ${response.status}`);
-    }
-    return true;
-    
+    return await fetchWithAuth(`/product/set-following/${productId}?isFollowing=${isFollowing}`, {
+      method: "PATCH",
+    });
   } catch (error) {
     console.error("Takip durumu güncellenirken hata oluştu:", error);
-    throw error; 
+    throw error;
   }
 }
-
-
-

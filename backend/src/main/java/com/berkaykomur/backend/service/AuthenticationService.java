@@ -9,4 +9,5 @@ public interface AuthenticationService {
     AuthResponse register(RegisterRequest request);
     AuthResponse login(LoginRequest request);
     AuthResponse refreshAccessToken(RefreshTokenRequest requestRefreshToken);
+    void logout(RefreshTokenRequest request,Long userId);
 }

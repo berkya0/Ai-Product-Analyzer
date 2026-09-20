@@ -1,7 +1,8 @@
+// src/components/AddSiteForm.jsx
 import React, { useState } from 'react';
-import { addSite }  from "../services/productService"; 
+import { addSite } from "../services/productService"; 
 
-function AddSiteForm() {
+function AddSiteForm({ onSiteAdded }) {
   const [formData, setFormData] = useState({
     siteName: '',
     siteUrl: '',
@@ -29,6 +30,11 @@ function AddSiteForm() {
       
       // Başarılı olunca formu temizle
       setFormData({ siteName: '', siteUrl: '', username: '', appPassword: '' });
+
+      // Settings bileşenindeki listeyi anlık günceller
+      if (onSiteAdded) {
+        onSiteAdded();
+      }
     } catch (error) {
       setStatus({ type: 'error', message: error.message || 'Site eklenirken bir hata oluştu.' });
     } finally {
@@ -48,7 +54,6 @@ function AddSiteForm() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Site Adı */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Site Adı</label>
             <input
@@ -62,7 +67,6 @@ function AddSiteForm() {
             />
           </div>
 
-          {/* Site URL */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Site URL</label>
             <input
@@ -78,7 +82,6 @@ function AddSiteForm() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Kullanıcı Adı */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">WordPress Kullanıcı Adı</label>
             <input
@@ -92,7 +95,6 @@ function AddSiteForm() {
             />
           </div>
 
-          {/* App Password */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Application Password</label>
             <input

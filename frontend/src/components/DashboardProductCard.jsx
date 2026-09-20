@@ -7,7 +7,7 @@ import {
   BellOff, 
   RefreshCw, 
   Trash2,
-  Clock // PENDING durumu için eklendi
+  Clock
 } from 'lucide-react';
 
 function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductClick }) {
@@ -16,6 +16,9 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductC
     if (score < 80) return 'bg-yellow-200 text-yellow-700';
     return 'bg-green-200 text-green-700';
   }
+
+  // Java DTO'dan `following` veya `isFollowing` gelme ihtimaline karşı fallback:
+  const isFollowingStatus = item?.isFollowing ?? item?.following ?? false;
 
   return (
     <div className="grid grid-cols-[1fr_100px_160px_130px_120px] items-center p-4 bg-white hover:shadow-md transition-shadow gap-7">
@@ -41,16 +44,16 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductC
 
       {/* 2. Skor Rozeti */}
       <div className="flex justify-center min-w-[60px]">
-        <span className={`px-3 py-1.5 rounded-xl font-bold text-sm ${getScoreBadgeClass(item?.aiScore*20)}`}>
-          {item?.aiScore*20}
+        <span className={`px-3 py-1.5 rounded-xl font-bold text-sm ${getScoreBadgeClass((item?.aiScore || 0) * 20)}`}>
+          {(item?.aiScore || 0) * 20}
         </span>
       </div>
 
       {/* 3. Takip Durumu */}
       <div className="flex items-center space-x-2 min-w-[140px]">
-        <span className={`w-3 h-3 rounded-full ${item?.isFollowing ? 'bg-blue-500' : 'bg-orange-500'}`} />
+        <span className={`w-3 h-3 rounded-full ${isFollowingStatus ? 'bg-blue-500' : 'bg-orange-500'}`} />
         <span className="text-sm font-medium text-gray-500">
-          {item?.isFollowing ? 'Takip ediliyor' : 'Takipde Değil'}
+          {isFollowingStatus ? 'Takip ediliyor' : 'Takipte Değil'}
         </span>
       </div>
 
@@ -77,11 +80,11 @@ function DashboardProducts({ item, onDelete, onRefresh, onToggleMute, onProductC
       {/* 5. Aksiyon Butonları */}
       <div className="flex items-center space-x-4 text-slate-700">
         <button 
-          onClick={() => onToggleMute(item?.id,item?.isFollowing)}
+          onClick={() => onToggleMute(item?.id, isFollowingStatus)}
           className="hover:text-black transition-colors"
-          title={item?.isFollowing ? "Takipten çık" : "Takibe al"}
+          title={isFollowingStatus ? "Takipten çık" : "Takibe al"}
         >
-          {item?.isFollowing ? <BellOff className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
+          {isFollowingStatus ? <BellOff className="w-5 h-5 text-blue-600" /> : <Bell className="w-5 h-5 text-slate-700" />}
         </button>
 
         <button 

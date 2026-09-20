@@ -21,6 +21,9 @@ import org.hibernate.annotations.SoftDelete;
 @Setter
 public class UserEntity extends BaseEntity {
 
+    @Column(nullable = false)
+    private String fullName;
+
     @Column(nullable = false, unique = true)
     private String username;
 

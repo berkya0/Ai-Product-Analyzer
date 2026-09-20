@@ -4,12 +4,15 @@ import com.berkaykomur.backend.dto.AuthResponse;
 import com.berkaykomur.backend.dto.LoginRequest;
 import com.berkaykomur.backend.dto.RefreshTokenRequest;
 import com.berkaykomur.backend.dto.RegisterRequest;
+import com.berkaykomur.backend.jwt.CustomUserDetails;
 import com.berkaykomur.backend.service.AuthenticationService;
 import com.berkaykomur.backend.service.impl.AuthenticationServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,5 +37,11 @@ public class AuthController {
     public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
         AuthResponse response = authenticationService.refreshAccessToken(request);
         return ResponseEntity.ok(response);
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest request,
+                                        @AuthenticationPrincipal CustomUserDetails currentUser) {
+        authenticationService.logout(request, currentUser.getUserId());
+        return ResponseEntity.ok().build();
     }
 }

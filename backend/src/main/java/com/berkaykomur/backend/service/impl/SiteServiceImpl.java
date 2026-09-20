@@ -27,7 +27,7 @@ public class SiteServiceImpl implements SiteService {
     @Transactional
     @Override
     public void addSite(SiteCreateRequest request, UserEntity user ) {
-        log.info("Yönlendirilecek yeni site ekleme isteği alındı siteURL: {}",request.siteUrl());
+        log.info("Yeni site ekleme isteği alındı siteURL: {} userId: {}",request.siteUrl(),user.getId());
         Site newSite = Site.builder()
                 .siteName(request.siteName())
                 .siteUrl(request.siteUrl())
@@ -36,7 +36,7 @@ public class SiteServiceImpl implements SiteService {
                 .user(user)
                 .build();
         siteRepository.save(newSite);
-        log.info("Site başarıyla eklendi! siteURL: {}",request.siteUrl());
+        log.info("Site başarıyla eklendi! siteURL: {} userId: {}",request.siteUrl(),user.getId());
     }
 
     @Override
@@ -53,5 +53,6 @@ public class SiteServiceImpl implements SiteService {
             throw new SiteNotFoundException("Silinecek site bulunamadı! ID: " + id);
         }
         siteRepository.deleteById(id);
+        log.info("Site silme işlemi başarılı userId: {} siteId: {}",userId,id);
     }
 }

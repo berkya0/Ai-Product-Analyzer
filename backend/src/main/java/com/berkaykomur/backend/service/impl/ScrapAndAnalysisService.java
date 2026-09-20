@@ -14,6 +14,7 @@ import com.berkaykomur.backend.repository.ProductRepository;
 import com.berkaykomur.backend.scrapper.Scrapper;
 import com.berkaykomur.backend.service.AiAnalysisService;
 import com.berkaykomur.backend.service.ScrapperService;
+import com.berkaykomur.backend.util.AnalysisSaveHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -34,21 +35,18 @@ public class ScrapAndAnalysisService {
     private final AnalysisMapper analysisMapper;
     private final ProductMapper productMapper;
     private final ProductRepository productRepository;
+    private final AnalysisSaveHelper analysisSaveHelper;
 
     @Async("analysisTaskExecutor")
-    @Transactional
-    public void startAsyncProcess(Long productId, String productUrl, boolean forceRefresh,Long userId) {
-        log.info("Ürün analizi işlenmeye başlandı. Product ID: {} forceRefresh:{}", productId,forceRefresh);
+    public void startAsyncProcess(Long productId, String productUrl, boolean forceRefresh, Long userId) {
+        log.info("Ürün analizi işlenmeye başlandı. Product ID: {}", productId);
         try {
             Scrapper scrapper = scrapperService.getScrapper(productUrl);
-            aiAnalysisService.createAnalysis(scrapper, productId, forceRefresh,userId);
+            aiAnalysisService.createAnalysis(scrapper, productId, forceRefresh, userId);
 
         } catch (Exception e) {
             log.error("İşlem sırasında hata oldu, FAILED yapılıyor. ID: {}", productId, e);
-            analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId,userId).ifPresent(analysis -> {
-                analysis.setStatus(Status.FAILED);
-                analysisRepository.save(analysis);
-            });
+            analysisSaveHelper.updateStatusToFailed(productId, userId);
         }
     }
     @Transactional

@@ -1,8 +1,7 @@
 package com.berkaykomur.backend.dto;
 
-import jakarta.persistence.Column;
-
 public record SiteResponse(
+        Long id,
         String siteName,
         String siteUrl,
         String username

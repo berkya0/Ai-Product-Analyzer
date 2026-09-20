@@ -2,6 +2,7 @@ package com.berkaykomur.backend.controller;
 
 import com.berkaykomur.backend.dto.ProductAnalysisCombinedResponse;
 import com.berkaykomur.backend.dto.ProductAnalyzeRequest;
+import com.berkaykomur.backend.exception.analysis.AiAnalaysisNotFoundException;
 import com.berkaykomur.backend.exception.product.ProductNotFoundException;
 import com.berkaykomur.backend.jwt.CustomUserDetails;
 import com.berkaykomur.backend.model.Analysis;
@@ -42,7 +43,7 @@ public class AiController {
                                          @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         Analysis analysis = analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId,currentUser.getUserId())
-                .orElseThrow(() -> new ProductNotFoundException("Bulunamadı"));
+                .orElseThrow(() -> new AiAnalaysisNotFoundException("Analiz Bulunamadı Product id: "+productId+" Kullanıcı Id:"+currentUser.getUserId()));
 
         if (analysis.getStatus() == Status.PENDING) {
             return ResponseEntity.ok(Map.of("status", "PENDING"));

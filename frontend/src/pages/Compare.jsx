@@ -1,3 +1,4 @@
+// src/pages/Compare.jsx
 import { useEffect, useState } from "react";
 import '@fontsource/montserrat';
 import Searchbar from "../components/Searchbar";
@@ -7,7 +8,6 @@ import { fetchProducts } from "../services/dashboardService";
 import { compareProducts } from "../services/productService";
 
 function Compare() {
-    
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -23,10 +23,14 @@ function Compare() {
             setLoading(true);
             try {
                 const productsData = await fetchProducts(currentPage, pageSize);
-                setProducts((prev) => {
-                    if (currentPage === 0) return productsData.content || [];
-                    return [...prev, ...(productsData.content || [])];
-                });
+                if (productsData && productsData.content) {
+                    setProducts((prev) => {
+                        if (currentPage === 0) return productsData.content || [];
+                        const existingIds = new Set(prev.map(p => p.id));
+                        const newItems = productsData.content.filter(p => !existingIds.has(p.id));
+                        return [...prev, ...newItems];
+                    });
+                }
             } catch (error) {
                 console.error("Ürünler yüklenirken hata oluştu:", error);
             } finally {
@@ -42,30 +46,29 @@ function Compare() {
             setCurrentPage((prev) => prev + 1);
         }
     };
+
     const handleRemoveProduct = (id) => {
-    const updated = selectedProducts.filter((p) => p.id !== id);
-    setSelectedProducts(updated);
-    
-    if (updated.length < 2) {
-        setCompareResults(null);
-    }
-};
+        const updated = selectedProducts.filter((p) => p.id !== id);
+        setSelectedProducts(updated);
+        
+        if (updated.length < 2) {
+            setCompareResults(null);
+        }
+    };
 
     const handleSelectProduct = (product) => {
         const isAlreadySelected = selectedProducts.some((p) => p.id === product.id);
 
         if (isAlreadySelected) {
-           
             const updated = selectedProducts.filter((p) => p.id !== product.id);
             setSelectedProducts(updated);
             if (updated.length < 2) setCompareResults(null);
         } else {
-            
             if (selectedProducts.length >= 2) {
                 alert("En fazla 2 ürün karşılaştırabilirsiniz.");
                 return;
             }
-            setSelectedProducts([...selectedProducts, product]);
+            setSelectedProducts(prev => [...prev, product]);
         }
     };
 
@@ -79,7 +82,8 @@ function Compare() {
                     setCompareResults(results);
                 } catch (error) {
                     console.error("Karşılaştırma sırasında hata:", error);
-                    alert("Karşılaştırma verileri çekilemedi.");
+                    setCompareResults(null);
+                    alert(error.message || "Karşılaştırma verileri çekilemedi.");
                 } finally {
                     setIsComparing(false);
                 }
@@ -89,12 +93,11 @@ function Compare() {
     }, [selectedProducts]);
 
     const filteredProducts = products.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+        p.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <main className="flex-1 min-h-screen font-['Montserrat'] bg-[#F8FAFC] p-8">
-           
             <header className="mb-6">
                 <h1 className="text-black font-semibold text-2xl">Karşılaştırma</h1>
                 <p className="text-sm text-[#747373] font-semibold mt-1">
@@ -102,7 +105,6 @@ function Compare() {
                 </p>
             </header>
 
-          
             <Searchbar
                 placeholder="Ürün ara..."
                 className="mb-6"
@@ -112,7 +114,6 @@ function Compare() {
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                
                 <div 
                     onScroll={handleScroll}
                     className="lg:col-span-4 max-h-[650px] overflow-y-auto pr-2 custom-scrollbar"
@@ -135,8 +136,10 @@ function Compare() {
                             Ürünler kıyaslanıyor, lütfen bekleyin...
                         </div>
                     ) : compareResults ? (
-                        <CompareResultCard results={compareResults} 
-                        onRemoveProduct={handleRemoveProduct}/>
+                        <CompareResultCard 
+                            results={compareResults} 
+                            onRemoveProduct={handleRemoveProduct}
+                        />
                     ) : (
                         <div className="bg-white p-12 rounded-2xl border border-blue-100 text-center text-slate-400 font-medium">
                             {selectedProducts.length === 0
@@ -145,7 +148,6 @@ function Compare() {
                         </div>
                     )}
                 </div>
-
             </div>
         </main>
     );
