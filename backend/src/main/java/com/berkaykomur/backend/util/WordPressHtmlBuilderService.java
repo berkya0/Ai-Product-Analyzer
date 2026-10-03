@@ -1,10 +1,11 @@
-package com.berkaykomur.backend.service.impl;
+package com.berkaykomur.backend.util;
 
 import com.berkaykomur.backend.dto.AnalysisResult;
 import com.berkaykomur.backend.dto.ProductResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-@Service
+@Component
 public class WordPressHtmlBuilderService {
 
     public String buildHtml(ProductResponse product, AnalysisResult analysis) {

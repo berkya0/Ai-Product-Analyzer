@@ -24,7 +24,6 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
 
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -54,17 +53,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     Long userId = jwtService.extractUserId(jwt);
 
-                    // 2. Veritabanına GİTMEDEN, elimizdeki verilerle bir UserEntity yaratıyoruz
                     UserEntity dummyUser = UserEntity.builder()
                             .id(userId)
                             .username(username)
-                            // Şifre veya email gibi alanlara Controller'da ihtiyacın yoksa null kalabilir.
                             .build();
 
-                    // 3. Bunu senin CustomUserDetails sınıfına sarıyoruz
                     CustomUserDetails userDetails = new CustomUserDetails(dummyUser);
 
-                    // 4. Spring Security'ye String değil, objenin kendisini veriyoruz!
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,

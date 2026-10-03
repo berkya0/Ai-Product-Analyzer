@@ -38,7 +38,6 @@ public class ScrapperServiceImpl implements ScrapperService {
 
         Optional<Product> optionalProduct = productRepository.findProductIncludingDeletedAndUser_Id(productUrl, userId);
 
-        // 1. SENARYO: Ürün veritabanında hiç yoksa yeni kazı ve kaydet
         if (optionalProduct.isEmpty()) {
             Product newProduct = createAndSaveProduct(productUrl, userId);
             log.info("Yeni ürün başarıyla kaydedildi. Product ID: {}", newProduct.getId());

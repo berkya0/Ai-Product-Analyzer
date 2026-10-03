@@ -28,13 +28,8 @@ public class SiteServiceImpl implements SiteService {
     @Override
     public void addSite(SiteCreateRequest request, UserEntity user ) {
         log.info("Yeni site ekleme isteği alındı siteURL: {} userId: {}",request.siteUrl(),user.getId());
-        Site newSite = Site.builder()
-                .siteName(request.siteName())
-                .siteUrl(request.siteUrl())
-                .username(request.username())
-                .appPassword(request.appPassword())
-                .user(user)
-                .build();
+        Site newSite = siteMapper.createSiteRequest(request);
+        newSite.setUser(user);
         siteRepository.save(newSite);
         log.info("Site başarıyla eklendi! siteURL: {} userId: {}",request.siteUrl(),user.getId());
     }

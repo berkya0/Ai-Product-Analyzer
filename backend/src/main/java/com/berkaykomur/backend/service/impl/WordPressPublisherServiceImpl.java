@@ -7,13 +7,13 @@ import com.berkaykomur.backend.exception.site.WordPressPublishException;
 import com.berkaykomur.backend.model.Site;
 import com.berkaykomur.backend.repository.SiteRepository;
 import com.berkaykomur.backend.service.WordPressPublisherService;
+import com.berkaykomur.backend.util.WordPressHtmlBuilderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
 import java.nio.charset.StandardCharsets;
@@ -26,7 +26,7 @@ public class WordPressPublisherServiceImpl implements WordPressPublisherService 
 
     private final SiteRepository siteRepository;
     private final WordPressHtmlBuilderService htmlBuilderService;
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient;
 
     @Override
     public String publish(Long siteId, String customTitle,String status,ProductAnalysisCombinedResponse combinedData,Long userId) {
