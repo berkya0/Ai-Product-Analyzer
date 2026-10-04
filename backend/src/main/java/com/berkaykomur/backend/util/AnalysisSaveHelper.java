@@ -7,6 +7,7 @@ import com.berkaykomur.backend.model.Product;
 import com.berkaykomur.backend.model.Status;
 import com.berkaykomur.backend.repository.AnalysisRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,22 +16,23 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AnalysisSaveHelper {
 
     private final AnalysisRepository analysisRepository;
     private final AnalysisMapper analysisMapper;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public AnalysisResult saveAnalysisResult(Product product, Optional<Analysis> existingAnalysisOp, AnalysisResult analysisResult) {
-        if (existingAnalysisOp.isEmpty()) {
-            throw new AiAnalaysisNotFoundException("Analiz akışında hata: PENDING analiz yok");
-        }
-        Analysis analysisEntity = existingAnalysisOp.get();
+    @Transactional
+    public AnalysisResult saveAnalysisResult(Product product, Long userId, AnalysisResult analysisResult) {
+
+        Analysis analysisEntity = analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(product.getId(), userId)
+                .orElseThrow(() -> new AiAnalaysisNotFoundException("Kaydedilecek analiz bulunamadı"));
         analysisMapper.updateAnalysisFromDto(analysisResult, analysisEntity);
         analysisEntity.setStatus(Status.SUCCESS);
         analysisEntity.setProduct(product);
 
         Analysis savedAnalysis = analysisRepository.save(analysisEntity);
+        log.info("Analiz işlemi veri tabanına kaydedildi");
         return analysisMapper.toAnalysisResult(savedAnalysis);
     }
     @Transactional(propagation = Propagation.REQUIRES_NEW)

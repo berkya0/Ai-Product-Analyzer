@@ -21,11 +21,8 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     )
     void restoreProduct(@Param("id") Long id);
 
-    @Query(
-            value = "SELECT * FROM product WHERE product_url = :productUrl",
-            nativeQuery = true
-    )
-    Optional<Product> findProductIncludingDeletedAndUser_Id(@Param("productUrl") String productUrl,Long userId);
+    @Query(value = "SELECT * FROM product p WHERE p.product_url = :productUrl AND p.user_id = :userId", nativeQuery = true)
+    Optional<Product> findProductIncludingDeletedAndUser_Id(@Param("productUrl") String productUrl, @Param("userId") Long userId);
 
     List<Product> findAllByIsFollowingIsTrue();
 

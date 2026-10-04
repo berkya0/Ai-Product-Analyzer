@@ -2,7 +2,6 @@ package com.berkaykomur.backend.service.impl;
 
 import com.berkaykomur.backend.dto.ProductResponse;
 import com.berkaykomur.backend.dto.ScrapperResult;
-
 import com.berkaykomur.backend.exception.analysis.UnspportedMarketPlaceException;
 import com.berkaykomur.backend.exception.user.UserNotFoundException;
 import com.berkaykomur.backend.mapper.ProductMapper;
@@ -33,7 +32,7 @@ public class ScrapperServiceImpl implements ScrapperService {
 
     @Transactional
     @Override
-    public ProductResponse executeScrapping(String productUrl, boolean forceRefresh, Long userId) {
+    public ProductResponse executeScrapping(String productUrl, Long userId) {
         log.info("Kullanıcı: {} -> Ürün kazıma işlemi başlatıldı. URL: {}", userId, productUrl);
 
         Optional<Product> optionalProduct = productRepository.findProductIncludingDeletedAndUser_Id(productUrl, userId);
@@ -47,14 +46,8 @@ public class ScrapperServiceImpl implements ScrapperService {
         Product existingProduct = optionalProduct.get();
         productRepository.restoreProduct(existingProduct.getId());
 
-        if (forceRefresh) {
-            log.info("Seçilen ürün bilgileri güncelleniyor. Product ID: {}", existingProduct.getId());
-            ScrapperResult scrapperResponse = scrapUrl(productUrl);
-            productMapper.updateProductFromDto(scrapperResponse, existingProduct);
-        } else {
-            log.info("Ürün veritabanında bulundu (forceRefresh=false). Product ID: {}", existingProduct.getId());
-        }
-
+        ScrapperResult scrapperResponse = scrapUrl(productUrl);
+        productMapper.updateProductFromDto(scrapperResponse, existingProduct);
         return productMapper.toProductResponse(existingProduct);
     }
 

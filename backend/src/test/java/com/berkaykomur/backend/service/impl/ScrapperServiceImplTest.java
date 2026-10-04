@@ -75,7 +75,7 @@ class ScrapperServiceImplTest {
     }
 
     @Test
-    @DisplayName("executeScrapping - Ürün DB'de yoksa: Kazınmalı, kullanıcıya atanmalı ve yeni ürün kaydedilmeli")
+    @DisplayName("executeScrapping - Ürün kazınmalı, kullanıcıya atanmalı ve yeni ürün kaydedilmeli")
     void executeScrapping_WhenProductDoesNotExist_ShouldCreateAndSaveProduct() {
 
         lenient().when(scrapper.supports(productUrl)).thenReturn(true);
@@ -87,7 +87,7 @@ class ScrapperServiceImplTest {
         when(productRepository.save(newProduct)).thenReturn(newProduct);
         when(productMapper.toProductResponse(newProduct)).thenReturn(expectedResponse);
 
-        ProductResponse actualResponse = scrapperService.executeScrapping(productUrl, false, userId);
+        ProductResponse actualResponse = scrapperService.executeScrapping(productUrl, userId);
 
         assertNotNull(actualResponse);
         assertEquals(expectedResponse, actualResponse);
@@ -111,52 +111,11 @@ class ScrapperServiceImplTest {
 
         UserNotFoundException exception = assertThrows(
                 UserNotFoundException.class,
-                () -> scrapperService.executeScrapping(productUrl, false, userId)
+                () -> scrapperService.executeScrapping(productUrl, userId)
         );
 
         assertTrue(exception.getMessage().contains("Kullanıcı bulunamadı id: " + userId));
         verify(productRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("executeScrapping - Ürün DB'de var ve forceRefresh=true ise: Restore edilmeli, yeniden kazınıp güncellenmeli")
-    void executeScrapping_WhenProductExistsAndForceRefreshIsTrue_ShouldRestoreAndScrapAndUpdateProduct() {
-        // ARRANGE / GIVEN
-        lenient().when(scrapper.supports(productUrl)).thenReturn(true);
-        when(productRepository.findProductIncludingDeletedAndUser_Id(productUrl, userId))
-                .thenReturn(Optional.of(existingProduct));
-        when(scrapper.scrap(productUrl)).thenReturn(scrapperResult);
-        when(productMapper.toProductResponse(existingProduct)).thenReturn(expectedResponse);
-
-        // ACT / WHEN
-        ProductResponse actualResponse = scrapperService.executeScrapping(productUrl, true, userId);
-
-        // ASSERT / THEN
-        assertEquals(expectedResponse, actualResponse);
-        verify(productRepository, times(1)).restoreProduct(existingProduct.getId());
-        verify(scrapper, times(1)).scrap(productUrl);
-        verify(productMapper, times(1)).updateProductFromDto(scrapperResult, existingProduct);
-        verify(productMapper, times(1)).toProductResponse(existingProduct);
-        verify(productRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("executeScrapping - Ürün DB'de var ve forceRefresh=false ise: Yeniden kazıma yapılmadan restore edilip dönülmeli")
-    void executeScrapping_WhenProductExistsAndForceRefreshIsFalse_ShouldRestoreWithoutScrapping() {
-        // ARRANGE / GIVEN
-        when(productRepository.findProductIncludingDeletedAndUser_Id(productUrl, userId))
-                .thenReturn(Optional.of(existingProduct));
-        when(productMapper.toProductResponse(existingProduct)).thenReturn(expectedResponse);
-
-        // ACT / WHEN
-        ProductResponse actualResponse = scrapperService.executeScrapping(productUrl, false, userId);
-
-        // ASSERT / THEN
-        assertEquals(expectedResponse, actualResponse);
-        verify(productRepository, times(1)).restoreProduct(existingProduct.getId());
-        verify(scrapper, never()).scrap(any());
-        verify(productMapper, never()).updateProductFromDto(any(), any());
-        verify(productMapper, times(1)).toProductResponse(existingProduct);
     }
 
     @Test
@@ -180,7 +139,6 @@ class ScrapperServiceImplTest {
         // ARRANGE / GIVEN
         when(scrapper.supports(productUrl)).thenReturn(false);
 
-        // ACT & ASSERT / WHEN & THEN
         UnspportedMarketPlaceException exception = assertThrows(
                 UnspportedMarketPlaceException.class,
                 () -> scrapperService.getScrapper(productUrl)

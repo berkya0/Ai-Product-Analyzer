@@ -91,11 +91,11 @@ class ScrapAndAnalysisServiceTest {
         when(scrapperService.getScrapper(productUrl)).thenReturn(mockScrapper);
 
         // ACT
-        scrapAndAnalysisService.startAsyncProcess(productId, productUrl, true, userId);
+        scrapAndAnalysisService.startAsyncProcess(productId, productUrl, userId);
 
         // ASSERT
         verify(scrapperService, times(1)).getScrapper(productUrl);
-        verify(aiAnalysisService, times(1)).createAnalysis(mockScrapper, productId, true, userId);
+        verify(aiAnalysisService, times(1)).createAnalysis(mockScrapper, productId, userId);
         verifyNoInteractions(analysisSaveHelper);
     }
 
@@ -106,9 +106,9 @@ class ScrapAndAnalysisServiceTest {
         when(scrapperService.getScrapper(productUrl)).thenThrow(new RuntimeException("Kazıma hatası"));
 
         // ACT & ASSERT
-        assertDoesNotThrow(() -> scrapAndAnalysisService.startAsyncProcess(productId, productUrl, true, userId));
+        assertDoesNotThrow(() -> scrapAndAnalysisService.startAsyncProcess(productId, productUrl, userId));
         verify(analysisSaveHelper, times(1)).updateStatusToFailed(productId, userId);
-        verify(aiAnalysisService, never()).createAnalysis(any(), any(), anyBoolean(), any());
+        verify(aiAnalysisService, never()).createAnalysis(any(), any(), any());
     }
 
 
@@ -116,48 +116,32 @@ class ScrapAndAnalysisServiceTest {
     @DisplayName("initiateAnalysis - Analiz yoksa: Yeni PENDING durumunda analiz oluşturulmalı")
     void initiateAnalysis_WhenNoExistingAnalysis_ShouldCreateAndSaveNewAnalysis() {
         // ARRANGE
-        when(scrapperService.executeScrapping(productUrl, false, userId)).thenReturn(mockProductResponse);
+        when(scrapperService.executeScrapping(productUrl, userId)).thenReturn(mockProductResponse);
         when(productRepository.findProductIncludingDeletedAndUser_Id(productUrl, userId))
                 .thenReturn(Optional.of(mockProduct));
         when(analysisRepository.getAnalysisByProduct_Id(productId)).thenReturn(Optional.empty());
 
         // ACT
-        Long resultId = scrapAndAnalysisService.initiateAnalysis(productUrl, false, userId);
+        Long resultId = scrapAndAnalysisService.initiateAnalysis(productUrl, userId);
 
         // ASSERT
         assertEquals(productId, resultId);
         verify(analysisRepository, times(1)).save(any(Analysis.class));
     }
 
-    @Test
-    @DisplayName("initiateAnalysis - Analiz zaten varsa: Yeni analiz kaydedilmeden ürün ID'si dönülmeli")
-    void initiateAnalysis_WhenAnalysisAlreadyExists_ShouldNotSaveNewAnalysis() {
-        // ARRANGE
-        when(scrapperService.executeScrapping(productUrl, false, userId)).thenReturn(mockProductResponse);
-        when(productRepository.findProductIncludingDeletedAndUser_Id(productUrl, userId))
-                .thenReturn(Optional.of(mockProduct));
-        when(analysisRepository.getAnalysisByProduct_Id(productId)).thenReturn(Optional.of(mockAnalysis));
-
-        // ACT
-        Long resultId = scrapAndAnalysisService.initiateAnalysis(productUrl, false, userId);
-
-        // ASSERT
-        assertEquals(productId, resultId);
-        verify(analysisRepository, never()).save(any());
-    }
 
     @Test
     @DisplayName("initiateAnalysis - Ürün veritabanında bulunamazsa: ProductNotFoundException fırlatılmalı")
     void initiateAnalysis_WhenProductNotFound_ShouldThrowProductNotFoundException() {
         // ARRANGE
-        when(scrapperService.executeScrapping(productUrl, false, userId)).thenReturn(mockProductResponse);
+        when(scrapperService.executeScrapping(productUrl, userId)).thenReturn(mockProductResponse);
         when(productRepository.findProductIncludingDeletedAndUser_Id(productUrl, userId))
                 .thenReturn(Optional.empty());
 
         // ACT & ASSERT
         ProductNotFoundException exception = assertThrows(
                 ProductNotFoundException.class,
-                () -> scrapAndAnalysisService.initiateAnalysis(productUrl, false, userId)
+                () -> scrapAndAnalysisService.initiateAnalysis(productUrl,userId)
         );
 
         assertTrue(exception.getMessage().contains("Ürün bilgileri çekilemedi :"));

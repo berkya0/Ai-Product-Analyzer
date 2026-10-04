@@ -22,11 +22,6 @@ public interface AnalysisRepository extends JpaRepository<Analysis,Long> {
 
     Page<Analysis> findAllByProduct_User_IdOrderByCreatedAtDesc(Pageable pageable, Long userId);
 
-    long countByProduct_User_Id(Long userId);
-
-    long countByProduct_User_IdAndStatus(Long userId, Status status);
-
-    long countByProduct_IsFollowingAndProduct_User_Id(boolean isFollowing, Long userId);
 
     List<Analysis> findAllByProduct_IdInAndProduct_User_Id(List<Long> productIds, Long userId);
 

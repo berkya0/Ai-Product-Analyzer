@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "product")
+@Table(name = "product", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_user_product_url", columnNames = {"user_id", "productUrl"})
+})
 @SoftDelete(columnName = "is_deleted")
 @Setter
 @Getter
@@ -23,7 +25,7 @@ public class Product extends BaseEntity {
     private String name;
     private String imageUrl;
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false)
     private String productUrl;
 
     private Double rating;

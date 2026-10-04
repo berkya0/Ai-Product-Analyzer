@@ -3,6 +3,8 @@ package com.berkaykomur.backend.ai.impl;
 import com.berkaykomur.backend.ai.AiAnalysis;
 import com.berkaykomur.backend.dto.AnalysisResult;
 import com.berkaykomur.backend.dto.Comment;
+import com.berkaykomur.backend.exception.analysis.AiAnalysisFailedException;
+import com.berkaykomur.backend.exception.analysis.NoCommentException;
 import com.berkaykomur.backend.scrapper.Scrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -23,15 +25,15 @@ public class AiAnalysisImpl implements AiAnalysis {
     public AnalysisResult analyzeComments(Scrapper scrapper, String productUrl){
         try {
             List<Comment> comments = scrapper.commentScrap(productUrl);
-            if (comments.isEmpty()) {
+            if (comments.size()<20) {
                 log.warn("Analiz edilecek yorum bulunamadı,AI analizi yapılmayacak: {}",productUrl);
-                return null;
+                throw new NoCommentException("Analiz edilecek yorum sayısı minumum 20 olmalı. Yorum sayısı: "+comments.size());
             }
             return analyze(comments);
 
         } catch (Exception e) {
             log.error("Analiz sırasında hata oluştu", e);
-            return null;
+            throw new AiAnalysisFailedException("Yorumlar analiz edilirken bir hata oluştu",e);
         }
     }
     private AnalysisResult analyze(List<Comment> comments) {
@@ -162,14 +164,14 @@ public class AiAnalysisImpl implements AiAnalysis {
                     .call()
                     .entity(AnalysisResult.class);
         } catch (Exception e) {
-            log.error("AI analizi sonucunda hata oluştu", e);
-            return null;
+            throw new AiAnalysisFailedException("Analiz sırasında bir hata oluştu",e);
         }
     }
 
     private String formatComments(List<Comment> comments) {
         return comments.stream()
-                .map(Comment::text)
+                .map(c -> String.format("Rating: %d | Likes: %d | Comment: %s",
+                        c.rate(), c.likesCount(), c.text()))
                 .reduce((a, b) -> a + "\n" + b)
                 .orElse("");
     }

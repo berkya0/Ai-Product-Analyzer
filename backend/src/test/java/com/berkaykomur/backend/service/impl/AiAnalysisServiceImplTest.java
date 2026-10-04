@@ -78,7 +78,7 @@ class AiAnalysisServiceImplTest {
 
         ProductNotFoundException exception = assertThrows(
                 ProductNotFoundException.class,
-                () -> analysisService.createAnalysis(scrapper, productId, false, userId)
+                () -> analysisService.createAnalysis(scrapper, productId,userId)
         );
 
         assertEquals("Id'ye göre ürün bulunamadı: " + productId, exception.getMessage());
@@ -86,58 +86,20 @@ class AiAnalysisServiceImplTest {
     }
 
     @Test
-    @DisplayName("createAnalysis: Mevcut başarılı analiz var ve forceRefresh=false ise direkt önbellekten dönmeli")
-    void createAnalysis_WhenExistingSuccessAnalysisAndNoForceRefresh_ShouldReturnCachedResult() {
-
+    @DisplayName("creatAnalysis:Ürün analizi başarılı bir şekilde kayıt edilmeli")
+    void createAnalysis_ShouldCreateAnalysis(){
         when(productRepository.findByIdAndUser_Id(productId, userId)).thenReturn(Optional.of(mockProduct));
-        when(analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId, userId))
-                .thenReturn(Optional.of(mockAnalysis));
-        when(analysisMapper.toAnalysisResult(mockAnalysis)).thenReturn(mockAnalysisResult);
+        when(aiAnalysis.analyzeComments(scrapper,mockProduct.getProductUrl())).thenReturn(mockAnalysisResult);
+        when(analysisSaveHelper.saveAnalysisResult(mockProduct,userId,mockAnalysisResult)).thenReturn(mockAnalysisResult);
 
-        AnalysisResult result = analysisService.createAnalysis(scrapper, productId, false, userId);
+        AnalysisResult analysisResult = analysisService.createAnalysis(scrapper, productId,userId);
+        assertNotNull(analysisResult);
+        assertEquals(mockAnalysisResult,analysisResult);
+        verify(aiAnalysis,times(1)).analyzeComments(scrapper,mockProduct.getProductUrl());
+        verify(analysisSaveHelper,times(1)).saveAnalysisResult(mockProduct,userId,analysisResult);
+        verify(productRepository,times(1)).findByIdAndUser_Id(productId,userId);
 
-        assertNotNull(result);
-        assertEquals(mockAnalysisResult, result);
-
-        verify(analysisMapper, times(1)).toAnalysisResult(mockAnalysis);
-        verifyNoInteractions(aiAnalysis, analysisSaveHelper);
     }
 
-    @Test
-    @DisplayName("createAnalysis: AI analizi null döndüğünde AiAnalaysisNotFoundException fırlatmalı")
-    void createAnalysis_WhenAiAnalysisReturnsNull_ShouldThrowException() {
 
-        when(productRepository.findByIdAndUser_Id(productId, userId)).thenReturn(Optional.of(mockProduct));
-        when(analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId, userId))
-                .thenReturn(Optional.empty());
-        when(aiAnalysis.analyzeComments(scrapper, mockProduct.getProductUrl())).thenReturn(null);
-
-        AiAnalaysisNotFoundException exception = assertThrows(
-                AiAnalaysisNotFoundException.class,
-                () -> analysisService.createAnalysis(scrapper, productId, false, userId)
-        );
-
-        assertTrue(exception.getMessage().contains(mockProduct.getProductUrl()));
-        verifyNoInteractions(analysisSaveHelper);
-    }
-
-    @Test
-    @DisplayName("createAnalysis: forceRefresh=true olduğunda AI analizi yeniden çalıştırıp kaydetmeli")
-    void createAnalysis_WhenForceRefreshIsTrue_ShouldRunAiAnalysisAndSave() {
-        when(productRepository.findByIdAndUser_Id(productId, userId)).thenReturn(Optional.of(mockProduct));
-        when(analysisRepository.getAnalysisByProduct_IdAndProduct_User_Id(productId, userId))
-                .thenReturn(Optional.of(mockAnalysis));
-        when(aiAnalysis.analyzeComments(scrapper, mockProduct.getProductUrl())).thenReturn(mockAnalysisResult);
-        when(analysisSaveHelper.saveAnalysisResult(eq(mockProduct), any(), eq(mockAnalysisResult)))
-                .thenReturn(mockAnalysisResult);
-
-        AnalysisResult result = analysisService.createAnalysis(scrapper, productId, true, userId);
-
-        assertNotNull(result);
-        assertEquals(mockAnalysisResult, result);
-
-        verifyNoInteractions(analysisMapper);
-        verify(aiAnalysis, times(1)).analyzeComments(scrapper, mockProduct.getProductUrl());
-        verify(analysisSaveHelper, times(1)).saveAnalysisResult(mockProduct, Optional.of(mockAnalysis), mockAnalysisResult);
-    }
 }

@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : followedProducts) {
             try {
                 log.info("Takip edilen ürün güncelleniyor. ID: {}, URL: {}", product.getId(), product.getProductUrl());
-                scrapperService.executeScrapping(product.getProductUrl(), true,product.getUser().getId());
+                scrapperService.executeScrapping(product.getProductUrl(),product.getUser().getId());
                 Thread.sleep(4000);
 
             } catch (Exception e) {

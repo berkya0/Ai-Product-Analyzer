@@ -64,9 +64,6 @@ class ProductServiceImplTest {
         mockProduct.setUser(mockUser);
     }
 
-    // ==========================================
-    // setFollow Testleri
-    // ==========================================
 
     @Test
     @DisplayName("setFollow - Ürün bulunduğunda: Takip durumu güncellenmeli ve kaydedilmeli")
@@ -101,9 +98,6 @@ class ProductServiceImplTest {
         verify(productRepository, never()).save(any());
     }
 
-    // ==========================================
-    // updateFollowedProductPrices Testleri
-    // ==========================================
 
     @Test
     @DisplayName("updateFollowedProductPrices - Takip edilen ürün yoksa: İşlem sonlandırılmalı")
@@ -131,7 +125,7 @@ class ProductServiceImplTest {
 
         // ASSERT
         verify(scrapperService, times(1))
-                .executeScrapping(mockProduct.getProductUrl(), true, userId);
+                .executeScrapping(mockProduct.getProductUrl(), userId);
     }
 
     @Test
@@ -140,18 +134,14 @@ class ProductServiceImplTest {
         // ARRANGE
         mockProduct.setFollowing(true);
         when(productRepository.findAllByIsFollowingIsTrue()).thenReturn(List.of(mockProduct));
-        when(scrapperService.executeScrapping(anyString(), anyBoolean(), any()))
+        when(scrapperService.executeScrapping(anyString(), any()))
                 .thenThrow(new RuntimeException("Kazıma hatası"));
 
         // ACT & ASSERT
         assertDoesNotThrow(() -> productService.updateFollowedProductPrices());
         verify(scrapperService, times(1))
-                .executeScrapping(mockProduct.getProductUrl(), true, userId);
+                .executeScrapping(mockProduct.getProductUrl(), userId);
     }
-
-    // ==========================================
-    // deleteProductDetailById Testleri
-    // ==========================================
 
     @Test
     @DisplayName("deleteProductDetailById - Ürün bulunduğunda: Silme metodu çağrılmalı")
@@ -185,14 +175,11 @@ class ProductServiceImplTest {
         verify(productRepository, never()).delete(any());
     }
 
-    // ==========================================
-    // compareProducts Testleri
-    // ==========================================
 
     @Test
     @DisplayName("compareProducts - Ürün ID listesi null veya 2'den farklı sayıda ise: IllegalArgumentException fırlatılmalı")
     void compareProducts_WhenProductIdsNullOrNotTwo_ShouldThrowIllegalArgumentException() {
-        // ACT & ASSERT
+        // ACT & ASSERT // ??? bu ney
         assertThrows(IllegalArgumentException.class, () -> productService.compareProducts(null, userId));
         assertThrows(IllegalArgumentException.class, () -> productService.compareProducts(List.of(1L), userId));
         assertThrows(IllegalArgumentException.class, () -> productService.compareProducts(List.of(1L, 2L, 3L), userId));
@@ -283,9 +270,6 @@ class ProductServiceImplTest {
         verify(analysisMapper, times(2)).toCompareResults(any(Analysis.class));
     }
 
-    // ==========================================
-    // Yardımcı Metotlar (Dummy Data Helpers)
-    // ==========================================
 
     private Product createProductWithCategory(String category) {
         Product product = new Product();

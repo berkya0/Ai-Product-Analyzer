@@ -30,8 +30,8 @@ public class AiController {
     public ResponseEntity<Map<String, Object>> analyze(@RequestBody ProductAnalyzeRequest request,
                                                        @AuthenticationPrincipal CustomUserDetails currentUser) {
 
-        Long productId = scrapAndAnalysisService.initiateAnalysis(request.productUrl(), false, currentUser.getUserId());
-        scrapAndAnalysisService.startAsyncProcess(productId, request.productUrl(), false, currentUser.getUserId());
+        Long productId = scrapAndAnalysisService.initiateAnalysis(request.productUrl(), currentUser.getUserId());
+        scrapAndAnalysisService.startAsyncProcess(productId, request.productUrl(), currentUser.getUserId());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(
                 "message", "İşlem sıraya alındı, analiz ediliyor.",
@@ -56,18 +56,18 @@ public class AiController {
         return ResponseEntity.ok(scrapAndAnalysisService.getAnalysisById(productId, currentUser.getUserId()));
     }
 
-    @PostMapping("/re-analyze")
-    public ResponseEntity<Map<String, Object>> reAnalyzeComments(@RequestBody ProductAnalyzeRequest request,
-                                                                 @AuthenticationPrincipal CustomUserDetails currentUser) {
-
-        Long productId = scrapAndAnalysisService.initiateAnalysis(request.productUrl(), true, currentUser.getUserId());
-        scrapAndAnalysisService.startAsyncProcess(productId, request.productUrl(), true,currentUser.getUserId());
-
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(
-                "message", "Yeniden analiz işlemi sıraya alındı.",
-                "productId", productId
-        ));
-    }
+//    @PostMapping("/re-analyze")
+//    public ResponseEntity<Map<String, Object>> reAnalyzeComments(@RequestBody ProductAnalyzeRequest request,
+//                                                                 @AuthenticationPrincipal CustomUserDetails currentUser) {
+//
+//        Long productId = scrapAndAnalysisService.initiateAnalysis(request.productUrl(), true, currentUser.getUserId());
+//        scrapAndAnalysisService.startAsyncProcess(productId, request.productUrl(), true,currentUser.getUserId());
+//
+//        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(
+//                "message", "Yeniden analiz işlemi sıraya alındı.",
+//                "productId", productId
+//        ));
+//    }
     @GetMapping("/latest")
     public ResponseEntity<ProductAnalysisCombinedResponse> getLatest(@AuthenticationPrincipal CustomUserDetails currentUser) {
         return ResponseEntity.ok(scrapAndAnalysisService.getLatestAnalysis(currentUser.getUserId()));

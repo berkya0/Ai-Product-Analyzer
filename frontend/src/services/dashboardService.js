@@ -23,7 +23,7 @@ export async function fetchProducts(page = 0, size = 10) {
  * Ürünün yorumlarını yeniden analiz eder
  */
 export async function reAnalyzeProduct(productUrl) {
-  return await fetchWithAuth("/ai/re-analyze", {
+  return await fetchWithAuth("/ai/analyze", {
     method: "POST",
     body: JSON.stringify({ productUrl }),
   });

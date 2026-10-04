@@ -26,7 +26,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+
 public class ScrapAndAnalysisService {
 
     private final ScrapperService scrapperService;
@@ -38,11 +38,11 @@ public class ScrapAndAnalysisService {
     private final AnalysisSaveHelper analysisSaveHelper;
 
     @Async("analysisTaskExecutor")
-    public void startAsyncProcess(Long productId, String productUrl, boolean forceRefresh, Long userId) {
+    public void startAsyncProcess(Long productId, String productUrl, Long userId) {
         log.info("Ürün analizi işlenmeye başlandı. Product ID: {}", productId);
         try {
             Scrapper scrapper = scrapperService.getScrapper(productUrl);
-            aiAnalysisService.createAnalysis(scrapper, productId, forceRefresh, userId);
+            aiAnalysisService.createAnalysis(scrapper, productId, userId);
 
         } catch (Exception e) {
             log.error("İşlem sırasında hata oldu, FAILED yapılıyor. ID: {}", productId, e);
@@ -50,22 +50,25 @@ public class ScrapAndAnalysisService {
         }
     }
     @Transactional
-    public Long initiateAnalysis(String productUrl, boolean forceRefresh,Long userId) {
-        ProductResponse scrappedProduct = scrapperService.executeScrapping(productUrl, forceRefresh, userId);
-        Product product = productRepository.findProductIncludingDeletedAndUser_Id(scrappedProduct.productUrl(), userId).
-                orElseThrow(()-> new ProductNotFoundException("Ürün bilgileri çekilemedi :"+scrappedProduct.productUrl()));
+    public Long initiateAnalysis(String productUrl,Long userId) {
+        ProductResponse scrappedProduct = scrapperService.executeScrapping(productUrl, userId);
+        Product product = productRepository.findProductIncludingDeletedAndUser_Id(scrappedProduct.productUrl(), userId)
+                .orElseThrow(() -> new ProductNotFoundException("Ürün bilgileri çekilemedi :" + scrappedProduct.productUrl()));
 
-        Optional<Analysis> analysis = analysisRepository.getAnalysisByProduct_Id(product.getId());
-        if(analysis.isEmpty()){
-            log.info("Yeni analiz oluşturuluyorr status:PENDING");
-            Analysis newAnalysis = new Analysis();
-            newAnalysis.setStatus(Status.PENDING);
-            newAnalysis.setProduct(product);
-            analysisRepository.save(newAnalysis);
-        }
+        Analysis analysisEntity = analysisRepository.getAnalysisByProduct_Id(product.getId())
+                .orElseGet(() -> {
+                    Analysis newAnalysis = new Analysis();
+                    newAnalysis.setProduct(product);
+                    return newAnalysis;
+                });
+
+        analysisEntity.setStatus(Status.PENDING);
+        analysisRepository.save(analysisEntity);
+
         return product.getId();
     }
 
+    @Transactional(readOnly = true)
     public ProductAnalysisCombinedResponse getLatestAnalysis(Long userId) {
         log.info("En son yapılan analiz sorgulanıyor...");
         Optional<Analysis> latestAnalysis = analysisRepository.findFirstByProduct_User_IdOrderByCreatedAtDesc(userId);
@@ -83,6 +86,7 @@ public class ScrapAndAnalysisService {
         return new ProductAnalysisCombinedResponse(latestProductDto, latestAnalysisDto);
     }
 
+    @Transactional(readOnly = true)
     public ProductAnalysisCombinedResponse getAnalysisById(Long productId,Long userId) {
         log.info("Product ID ile analiz sorgulanıyor. ID: {}", productId);
 
