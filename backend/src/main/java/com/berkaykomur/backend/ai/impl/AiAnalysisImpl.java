@@ -11,6 +11,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -23,18 +24,14 @@ public class AiAnalysisImpl implements AiAnalysis {
 
     @Override
     public AnalysisResult analyzeComments(Scrapper scrapper, String productUrl){
-        try {
-            List<Comment> comments = scrapper.commentScrap(productUrl);
-            if (comments.size()<20) {
-                log.warn("Analiz edilecek yorum bulunamadı,AI analizi yapılmayacak: {}",productUrl);
-                throw new NoCommentException("Analiz edilecek yorum sayısı minumum 20 olmalı. Yorum sayısı: "+comments.size());
-            }
-            return analyze(comments);
 
-        } catch (Exception e) {
-            log.error("Analiz sırasında hata oluştu", e);
-            throw new AiAnalysisFailedException("Yorumlar analiz edilirken bir hata oluştu",e);
+        List<Comment> comments = scrapper.commentScrap(productUrl);
+        if (comments.size() < 20) {
+            log.warn("Analiz edilecek yorum bulunamadı,AI analizi yapılmayacak: {}", productUrl);
+            throw new NoCommentException("Analiz edilecek yorum sayısı minumum 20 olmalı. Yorum sayısı: " + comments.size());
         }
+        return analyze(comments);
+
     }
     private AnalysisResult analyze(List<Comment> comments) {
         String prompt = """
@@ -170,10 +167,8 @@ public class AiAnalysisImpl implements AiAnalysis {
 
     private String formatComments(List<Comment> comments) {
         return comments.stream()
-                .map(c -> String.format("Rating: %d | Likes: %d | Comment: %s",
-                        c.rate(), c.likesCount(), c.text()))
-                .reduce((a, b) -> a + "\n" + b)
-                .orElse("");
+                .map(c -> "Rating: " + c.rate() + " | Likes: " + c.likesCount() + " | Comment: " + c.text())
+                .collect(Collectors.joining("\n"));
     }
 
 }

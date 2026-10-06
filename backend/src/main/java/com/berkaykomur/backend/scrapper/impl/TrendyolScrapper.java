@@ -239,7 +239,7 @@ public class TrendyolScrapper implements Scrapper {
                 .filter(c -> c.text() != null && c.text().trim().length() > 15)
                 // 2. En çok beğeni alan ilk 170 yorumu seç (Temsil gücü en yüksek olanlar)
                 .sorted(Comparator.comparingInt(Comment::likesCount).reversed())
-                .limit(150)
+                .limit(170)
                 .toList();
     }
 
