@@ -160,6 +160,59 @@ provega/
 
 ---
 
+## 🌐 WordPress Entegrasyonu
+
+Vega, oluşturduğu AI analizlerini WordPress REST API üzerinden doğrudan yayınlayabilir.
+
+```text
+AI Analizi
+    ↓
+HTML oluşturma
+    ↓
+Preview
+    ↓
+WordPress REST API
+    ↓
+Yeni Post
+```
+
+WordPress Application Password bilgileri güvenli şekilde şifrelenerek saklanır.
+
+---
+
+## 🔐 Authentication
+
+Kimlik doğrulama sistemi:
+
+- JWT Access Token
+- Refresh Token
+- BCrypt Password Hashing
+- Protected Routes
+- Automatic Token Refresh
+
+üzerine kuruludur.
+
+---
+
+## 📸 Ekran Görüntüleri
+
+| Giriş | Kayıt Ol |
+|---|---|
+| ![Giriş](assets/login.png) | ![Kayıt ol](assets/register.png) |
+
+| Ana Sayfa | Dashboard |
+|---|---|
+| ![Ana Sayfa](assets/homePage.png) | ![Dashboard](assets/dashboardPage.png) |
+
+| Ürün Karşılaştırma | Ayarlar |
+|---|---|
+| ![Karşılaştırma](assets/comparePage.png) | ![settingsPage](assets/settingsPage.png) |
+
+| Wordpress |
+|---|
+| ![Karşılaştırma](assets/wordpress.png) |
+
+---
 ## ⚡ Kurulum
 
 ### Gereksinimler
@@ -222,62 +275,6 @@ GOOGLE_GENAI_API_KEY=********
 JWT_SECRET_KEY=********
 APP_ENCRYPTION_SECRET=********
 ```
-
----
-
-## 🌐 WordPress Entegrasyonu
-
-Vega, oluşturduğu AI analizlerini WordPress REST API üzerinden doğrudan yayınlayabilir.
-
-```text
-AI Analizi
-    ↓
-HTML oluşturma
-    ↓
-Preview
-    ↓
-WordPress REST API
-    ↓
-Yeni Post
-```
-
-WordPress Application Password bilgileri güvenli şekilde şifrelenerek saklanır.
-
----
-
-## 🔐 Authentication
-
-Kimlik doğrulama sistemi:
-
-- JWT Access Token
-- Refresh Token
-- BCrypt Password Hashing
-- Protected Routes
-- Automatic Token Refresh
-
-üzerine kuruludur.
-
----
-
-## 📸 Ekran Görüntüleri
-
-| Giriş | Kayıt Ol |
-|---|---|
-| ![Giriş](assets/login.png) | ![Kayıt ol](assets/register.png) |
-
-| Ana Sayfa | Dashboard |
-|---|---|
-| ![Ana Sayfa](assets/homePage.png) | ![Dashboard](assets/dashboardPage.png) |
-
-| Ürün Karşılaştırma | Ayarlar |
-|---|---|
-| ![Karşılaştırma](assets/comparePage.png) | ![settingsPage](assets/settingsPage.png) |
-
-| Wordpress |
-|---|
-| ![Karşılaştırma](assets/wordpress.png) |
-
----
 
 ## 👨‍💻 Geliştirici
 
